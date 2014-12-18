@@ -149,4 +149,19 @@ class ObjectManager
         $generated .= $filename.'.GCObjectManager';
         return $generated;
     }
+
+    /**
+     * Removes oldest objects from memory
+     * @param $class
+     * @param $count
+     * @return void
+     */
+    public function garbageCollect($class, $count)
+    {
+        while(count($this->objects[$class] > $count))
+        {
+            array_shift($this->objects[$class]);
+        }
+    }
+
 }
