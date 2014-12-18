@@ -136,7 +136,7 @@ class ObjectManager
      */
     protected function cacheLocation($fullClass)
     {
-        $generated = dirname(__FILE__).'../../../generated/';
+        $generated = dirname(__FILE__).'/../../../generated/';
         if(!is_dir($generated))
         {
             if(!mkdir($generated,0755,true))
