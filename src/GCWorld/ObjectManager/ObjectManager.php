@@ -3,12 +3,12 @@ namespace GCWorld\ObjectManager;
 
 class ObjectManager
 {
-    private static $instance	= null;
-    private $objects			= array();
-    private $namespaces         = array();
+    protected static $instance	= null;
+    protected $objects			= array();
+    protected $namespaces       = array();
 
-    private function __construct(){}
-    private function __clone() {}
+    protected function __construct(){}
+    protected function __clone() {}
 
     /**
      * @return ObjectManager|null
@@ -134,7 +134,7 @@ class ObjectManager
     /**
      * @return string
      */
-    private function cacheLocation($fullClass)
+    protected function cacheLocation($fullClass)
     {
         $generated = dirname(__FILE__).'../../../generated/';
         if(!is_dir($generated))
