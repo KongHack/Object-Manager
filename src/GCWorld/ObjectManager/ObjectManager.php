@@ -25,10 +25,12 @@ class ObjectManager
 
     /**
      * @param $namespace
+     * @return $this
      */
     public function addNamespace($namespace)
     {
         array_unshift($this->namespaces, $namespace);
+        return self::$instance;
     }
 
     /**
