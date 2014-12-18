@@ -139,7 +139,7 @@ class ObjectManager
         $generated = dirname(__FILE__).'../../../generated/';
         if(!is_dir($generated))
         {
-            if!(mkdir($generated,0755,true))
+            if(!mkdir($generated,0755,true))
             {
                 d($generated);
             }
