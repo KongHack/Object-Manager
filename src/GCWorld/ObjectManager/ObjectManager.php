@@ -43,8 +43,8 @@ class ObjectManager
      */
     public function getObject($class, $id = null, $arr = null, $forceNew = false)
     {
-        //Class should not contain a namespace.  If it does, we are dealing with an absolute and should not prepend.
-        if(strstr($class,'\\'))
+        //If the first character is a backslash, assume this is a fully defined namespace
+        if(substr($class, 0, 1)=='\\')
         {
             if(!class_exists($class))
             {
