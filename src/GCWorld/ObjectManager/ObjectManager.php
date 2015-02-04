@@ -6,8 +6,12 @@ class ObjectManager
     protected static $instance	= null;
     protected $objects			= array();
     protected $namespaces       = array();
+    protected $master_location		= null;
 
-    protected function __construct(){}
+    protected function __construct()
+    {
+        $this->master_location	= __DIR__;
+    }
     protected function __clone() {}
 
     /**
@@ -136,7 +140,7 @@ class ObjectManager
      */
     protected function cacheLocation($fullClass)
     {
-        $generated = dirname(__FILE__).'/../../../generated/';
+        $generated = $this->master_location . DIRECTORY_SEPARATOR . 'Generated/';
         if(!is_dir($generated))
         {
             if(!mkdir($generated,0755,true))
@@ -168,5 +172,4 @@ class ObjectManager
             array_shift($this->objects[$class]);
         }
     }
-
 }
