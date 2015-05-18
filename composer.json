@@ -1,5 +1,5 @@
 {
-  "name": "GCWorld/ObjectManager",
+  "name": "gcworld/objectmanager",
   "description": "GCWorld Industries Object Manager",
   "authors": [
     {
@@ -7,13 +7,11 @@
       "email": "admin@gamecharmer.com"
     }
   ],
-  "minimum-stability": "dev",
   "require": {
     "php": ">=5.4.0"
   },
   "autoload": {
-    "psr-0": {
-      "GCWorld": "src/"
-    }
-  }
+    "psr-4": {"GCWorld\\ObjectManager\\": "src/"}
+  },
+  "license":"proprietary"
 }
