@@ -84,7 +84,7 @@ class ObjectManager
                 $set = 'CLASS_PRIMARY';
             }
 
-            file_put_contents($path,$path);
+            file_put_contents($path, $set);
         }
         else
         {
