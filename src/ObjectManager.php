@@ -71,6 +71,10 @@ class ObjectManager
 
         //Let's see if we have a reflection cached.
         $path = $this->cacheLocation($class);
+        if (file_exists($path) && filemtime($path) < 1435689479) {
+            unlink($path);
+        }
+
         if(!file_exists($path))
         {
             $set = 'unknown';
