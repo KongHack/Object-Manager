@@ -167,7 +167,7 @@ class ObjectManager
      */
     public function garbageCollect($class, $count)
     {
-        while(count($this->objects[$class] > $count))
+        while(count($this->objects[$class]) > $count)
         {
             array_shift($this->objects[$class]);
         }
