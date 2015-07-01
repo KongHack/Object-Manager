@@ -3,24 +3,25 @@ namespace GCWorld\ObjectManager;
 
 class ObjectManager
 {
-    protected static $instance	= null;
-    protected $objects			= array();
+    protected static $instance  = null;
+    protected $objects          = array();
     protected $namespaces       = array();
-    protected $master_location		= null;
+    protected $master_location      = null;
 
     protected function __construct()
     {
-        $this->master_location	= __DIR__;
+        $this->master_location  = __DIR__;
     }
-    protected function __clone() {}
+    protected function __clone()
+    {
+    }
 
     /**
      * @return ObjectManager|null
      */
     public static function getInstance()
     {
-        if(self::$instance == null)
-        {
+        if (self::$instance == null) {
             self::$instance = new self();
             self::$instance->addNamespace(__NAMESPACE__);
         }
@@ -48,21 +49,15 @@ class ObjectManager
     public function getObject($class, $id = null, $arr = null, $forceNew = false)
     {
         //If the first character is a backslash, assume this is a fully defined namespace
-        if(substr($class, 0, 1)=='\\')
-        {
-            if(!class_exists($class))
-            {
+        if (substr($class, 0, 1)=='\\') {
+            if (!class_exists($class)) {
                 throw new \Exception('Class Does Not Exist');
             }
-        }
-        else
-        {
+        } else {
             //Cycle up through namespaces to find this class.
-            foreach($this->namespaces as $namespace)
-            {
-                $concat = '\\'.trim($namespace,'\\').'\\'.$class;
-                if(class_exists($concat))
-                {
+            foreach ($this->namespaces as $namespace) {
+                $concat = '\\'.trim($namespace, '\\').'\\'.$class;
+                if (class_exists($concat)) {
                     $class = $concat;
                     break;
                 }
@@ -71,54 +66,39 @@ class ObjectManager
 
         //Let's see if we have a reflection cached.
         $path = $this->cacheLocation($class);
-        if(!file_exists($path))
-        {
+        if (!file_exists($path)) {
             $set = 'unknown';
             $test = new \ReflectionClass($class);
-            if($test->implementsInterface('\GCWorld\ORM\GeneratedInterface'))
-            {
+            if ($test->implementsInterface('\GCWorld\ORM\GeneratedInterface')) {
                 $set = 'GeneratedInterface';
-            }
-            elseif(defined($class.'::CLASS_PRIMARY')) //second test, check to see if this has the CLASS_PRIMARY constant.  If so, we're good.
-            {
+            } elseif (defined($class.'::CLASS_PRIMARY')) { //second test, check to see if this has the CLASS_PRIMARY constant.  If so, we're good.
                 $set = 'CLASS_PRIMARY';
             }
 
             file_put_contents($path, $set);
-        }
-        else
-        {
+        } else {
             $set = file_get_contents($path);
         }
 
-        if(!class_exists($class))
-        {
+        if (!class_exists($class)) {
             throw new \Exception('Class Does Not Exist (2)');
         }
 
-        if($set == 'GeneratedInterface' || $set == 'CLASS_PRIMARY')
-        {
-            if($id == null && is_array($arr))
-            {
+        if ($set == 'GeneratedInterface' || $set == 'CLASS_PRIMARY') {
+            if ($id == null && is_array($arr)) {
                 $primary_key = constant($class.'::CLASS_PRIMARY');
                 $id = $arr[$primary_key];
             }
 
-            if(!isset($this->objects[$class][$id]) || $forceNew)
-            {
-                if(is_array($arr))
-                {
+            if (!isset($this->objects[$class][$id]) || $forceNew) {
+                if (is_array($arr)) {
                     $this->objects[$class][$id] = new $class(null, $arr);
-                }
-                else
-                {
+                } else {
                     $this->objects[$class][$id] = new $class($id);
                 }
             }
             return $this->objects[$class][$id];
-        }
-        else
-        {
+        } else {
             // This isn't something we can track, so just return a new one of it.
             // Always pass both args to be safe.
             return new $class($id,$arr);
@@ -141,19 +121,18 @@ class ObjectManager
     protected function cacheLocation($fullClass)
     {
         $generated = $this->master_location . DIRECTORY_SEPARATOR . 'Generated/';
-        if(!is_dir($generated))
-        {
-            if(!mkdir($generated,0755,true))
-            {
-                d($generated);
+        if (!is_dir($generated)) {
+            if (!mkdir($generated, 0755, true)) {
+                if (function_exists('d')) {
+                    d($generated);
+                }
             }
         }
-        $temp = explode('\\',$fullClass);
+        $temp = explode('\\', $fullClass);
         $filename = array_pop($temp);
-        $generated .= implode('/',$temp).'/';
-        if(!is_dir($generated))
-        {
-            mkdir($generated,0755,true);
+        $generated .= implode('/', $temp).'/';
+        if (!is_dir($generated)) {
+            mkdir($generated, 0755, true);
         }
         $generated .= $filename.'.GCObjectManager';
         return $generated;
@@ -167,9 +146,11 @@ class ObjectManager
      */
     public function garbageCollect($class, $count)
     {
-        while(count($this->objects[$class]) > $count)
-        {
-            array_shift($this->objects[$class]);
+        if (array_key_exists($class, $this->objects)) {
+            while (count($this->objects[$class]) > $count) {
+                array_shift($this->objects[$class]);
+            }
         }
+
     }
 }
