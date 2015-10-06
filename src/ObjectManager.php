@@ -48,6 +48,52 @@ class ObjectManager
      */
     public function getObject($class, $id = null, $arr = null, $forceNew = false)
     {
+        $type = $this->getClassType($class);
+
+        if ($type == 'GeneratedInterface' || $type == 'CLASS_PRIMARY') {
+            if ($id == null && is_array($arr)) {
+                $primary_key = constant($class.'::CLASS_PRIMARY');
+                $id = $arr[$primary_key];
+            }
+
+            if (!isset($this->objects[$class][$id]) || $forceNew) {
+                if (is_array($arr)) {
+                    $this->objects[$class][$id] = new $class(null, $arr);
+                } else {
+                    $this->objects[$class][$id] = new $class($id);
+                }
+            }
+            return $this->objects[$class][$id];
+        } else {
+            // This isn't something we can track, so just return a new one of it.
+            // Always pass both args to be safe.
+            return new $class($id,$arr);
+        }
+    }
+
+    /**
+     * @param            $class
+     * @param bool|false $forceNew
+     * @param            ...$keys
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getMultiObject($class, $forceNew = false, ...$keys)
+    {
+        $type = $this->getClassType($class);
+        if ($type == 'GeneratedMultiInterface') {
+            $xKey = implode('-', $keys);
+            if (!isset($this->objects[$class][$xKey]) || $forceNew) {
+                $this->objects[$class][$xKey] = new $class(...$keys);
+            }
+            return $this->objects[$class][$xKey];
+        } else {
+            return new $class(...$keys);
+        }
+    }
+
+    private function getClassType($class)
+    {
         //If the first character is a backslash, assume this is a fully defined namespace
         if (substr($class, 0, 1)=='\\') {
             if (!class_exists($class)) {
@@ -71,6 +117,8 @@ class ObjectManager
             $test = new \ReflectionClass($class);
             if ($test->implementsInterface('\GCWorld\ORM\GeneratedInterface')) {
                 $set = 'GeneratedInterface';
+            } elseif ($test->implementsInterface('\GCWorld\ORM\GeneratedMultiInterface')) {
+                $set = 'GeneratedMultiInterface';
             } elseif (defined($class.'::CLASS_PRIMARY')) { //second test, check to see if this has the CLASS_PRIMARY constant.  If so, we're good.
                 $set = 'CLASS_PRIMARY';
             }
@@ -84,25 +132,7 @@ class ObjectManager
             throw new \Exception('Class Does Not Exist (2)');
         }
 
-        if ($set == 'GeneratedInterface' || $set == 'CLASS_PRIMARY') {
-            if ($id == null && is_array($arr)) {
-                $primary_key = constant($class.'::CLASS_PRIMARY');
-                $id = $arr[$primary_key];
-            }
-
-            if (!isset($this->objects[$class][$id]) || $forceNew) {
-                if (is_array($arr)) {
-                    $this->objects[$class][$id] = new $class(null, $arr);
-                } else {
-                    $this->objects[$class][$id] = new $class($id);
-                }
-            }
-            return $this->objects[$class][$id];
-        } else {
-            // This isn't something we can track, so just return a new one of it.
-            // Always pass both args to be safe.
-            return new $class($id,$arr);
-        }
+        return $set;
     }
 
     /**
