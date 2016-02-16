@@ -3,15 +3,16 @@ namespace GCWorld\ObjectManager;
 
 class ObjectManager
 {
-    protected static $instance  = null;
-    protected $objects          = array();
-    protected $namespaces       = array();
-    protected $master_location      = null;
+    protected static $instance        = null;
+    protected        $objects         = array();
+    protected        $namespaces      = array();
+    protected        $master_location = null;
 
     protected function __construct()
     {
-        $this->master_location  = __DIR__;
+        $this->master_location = __DIR__;
     }
+
     protected function __clone()
     {
     }
@@ -25,6 +26,7 @@ class ObjectManager
             self::$instance = new self();
             self::$instance->addNamespace(__NAMESPACE__);
         }
+
         return self::$instance;
     }
 
@@ -35,11 +37,12 @@ class ObjectManager
     public function addNamespace($namespace)
     {
         array_unshift($this->namespaces, $namespace);
+
         return self::$instance;
     }
 
     /**
-     * @param $class
+     * @param      $class
      * @param null $id
      * @param null $arr
      * @param bool $forceNew
@@ -53,7 +56,7 @@ class ObjectManager
         if ($type == 'GeneratedInterface' || $type == 'CLASS_PRIMARY') {
             if ($id == null && is_array($arr)) {
                 $primary_key = constant($class.'::CLASS_PRIMARY');
-                $id = $arr[$primary_key];
+                $id          = $arr[$primary_key];
             }
 
             if (!isset($this->objects[$class][$id]) || $forceNew) {
@@ -63,11 +66,12 @@ class ObjectManager
                     $this->objects[$class][$id] = new $class($id);
                 }
             }
+
             return $this->objects[$class][$id];
         } else {
             // This isn't something we can track, so just return a new one of it.
             // Always pass both args to be safe.
-            return new $class($id,$arr);
+            return new $class($id, $arr);
         }
     }
 
@@ -86,6 +90,7 @@ class ObjectManager
             if (!isset($this->objects[$class][$xKey]) || $forceNew) {
                 $this->objects[$class][$xKey] = new $class(...$keys);
             }
+
             return $this->objects[$class][$xKey];
         } else {
             return new $class(...$keys);
@@ -95,7 +100,7 @@ class ObjectManager
     private function getClassType($class)
     {
         //If the first character is a backslash, assume this is a fully defined namespace
-        if (substr($class, 0, 1)=='\\') {
+        if (substr($class, 0, 1) == '\\') {
             if (!class_exists($class)) {
                 throw new \Exception('Class Does Not Exist');
             }
@@ -113,11 +118,11 @@ class ObjectManager
         //Let's see if we have a reflection cached.
         $path = $this->cacheLocation($class);
         if (!file_exists($path)) {
-            $set = 'unknown';
+            $set  = 'unknown';
             $test = new \ReflectionClass($class);
-            if ($test->implementsInterface('\GCWorld\ORM\GeneratedInterface')) {
+            if ($test->implementsInterface('\GCWorld\ORM\GeneratedInterface') || $test->implementsInterface('\GCWorld\ORM\Interfaces\GeneratedInterface')) {
                 $set = 'GeneratedInterface';
-            } elseif ($test->implementsInterface('\GCWorld\ORM\GeneratedMultiInterface')) {
+            } elseif ($test->implementsInterface('\GCWorld\ORM\GeneratedMultiInterface') || $test->implementsInterface('\GCWorld\ORM\Interfaces\GeneratedMultiInterface')) {
                 $set = 'GeneratedMultiInterface';
             } elseif (defined($class.'::CLASS_PRIMARY')) { //second test, check to see if this has the CLASS_PRIMARY constant.  If so, we're good.
                 $set = 'CLASS_PRIMARY';
@@ -150,7 +155,7 @@ class ObjectManager
      */
     protected function cacheLocation($fullClass)
     {
-        $generated = $this->master_location . DIRECTORY_SEPARATOR . 'Generated/';
+        $generated = $this->master_location.DIRECTORY_SEPARATOR.'Generated/';
         if (!is_dir($generated)) {
             if (!mkdir($generated, 0755, true)) {
                 if (function_exists('d')) {
@@ -158,13 +163,14 @@ class ObjectManager
                 }
             }
         }
-        $temp = explode('\\', $fullClass);
+        $temp     = explode('\\', $fullClass);
         $filename = array_pop($temp);
         $generated .= implode('/', $temp).'/';
         if (!is_dir($generated)) {
             mkdir($generated, 0755, true);
         }
         $generated .= $filename.'.GCObjectManager';
+
         return $generated;
     }
 
