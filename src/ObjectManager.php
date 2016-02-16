@@ -118,11 +118,16 @@ class ObjectManager
         //Let's see if we have a reflection cached.
         $path = $this->cacheLocation($class);
         if (!file_exists($path)) {
-            $set  = 'unknown';
-            $test = new \ReflectionClass($class);
-            if ($test->implementsInterface('\GCWorld\ORM\GeneratedInterface') || $test->implementsInterface('\GCWorld\ORM\Interfaces\GeneratedInterface')) {
+            $set        = 'unknown';
+            $implements = class_implements($class);
+
+            if (in_array('\GCWorld\ORM\GeneratedInterface',
+                    $implements) || in_array('\GCWorld\ORM\Interfaces\GeneratedInterface', $implements)
+            ) {
                 $set = 'GeneratedInterface';
-            } elseif ($test->implementsInterface('\GCWorld\ORM\GeneratedMultiInterface') || $test->implementsInterface('\GCWorld\ORM\Interfaces\GeneratedMultiInterface')) {
+            } elseif (in_array('\GCWorld\ORM\GeneratedMultiInterface',
+                    $implements) || in_array('\GCWorld\ORM\Interfaces\GeneratedMultiInterface', $implements)
+            ) {
                 $set = 'GeneratedMultiInterface';
             } elseif (defined($class.'::CLASS_PRIMARY')) { //second test, check to see if this has the CLASS_PRIMARY constant.  If so, we're good.
                 $set = 'CLASS_PRIMARY';
