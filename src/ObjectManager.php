@@ -4,13 +4,35 @@ namespace GCWorld\ObjectManager;
 class ObjectManager
 {
     protected static $instance        = null;
-    protected        $objects         = array();
-    protected        $namespaces      = array();
+    protected        $objects         = [];
+    protected        $namespaces      = [];
+    protected        $object_types    = [];
+    protected        $config_location = null;
     protected        $master_location = null;
+    protected        $objects_changed = false;
 
     protected function __construct()
     {
         $this->master_location = __DIR__;
+        $this->config_location = $this->master_location.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.
+            'config'.DIRECTORY_SEPARATOR;
+
+        if (!is_dir($this->config_location)) {
+            mkdir($this->config_location);
+        }
+        if (file_exists($this->config_location.'config.php')) {
+            $this->object_types = include($this->config_location.'config.php');
+        } else {
+            $this->objects_changed = true;
+        }
+    }
+
+    public function __destruct()
+    {
+        if ($this->objects_changed) {
+            $contents = "<?php\n return ".var_export($this->object_types).";\n";
+            file_put_contents($this->config_location.'config.php', $contents);
+        }
     }
 
     protected function __clone()
@@ -99,6 +121,10 @@ class ObjectManager
 
     private function getClassType($class)
     {
+        if (array_key_exists($class, $this->object_types)) {
+            return $this->object_types[$class];
+        }
+
         //If the first character is a backslash, assume this is a fully defined namespace
         if (substr($class, 0, 1) == '\\') {
             if (!class_exists($class)) {
@@ -115,32 +141,27 @@ class ObjectManager
             }
         }
 
-        //Let's see if we have a reflection cached.
-        $path = $this->cacheLocation($class);
-        if (!file_exists($path)) {
-            $set        = 'unknown';
-            $implements = class_implements($class);
+        $set        = 'unknown';
+        $implements = class_implements($class);
 
-            if (in_array('\GCWorld\ORM\GeneratedInterface',
-                    $implements) || in_array('\GCWorld\ORM\Interfaces\GeneratedInterface', $implements)
-            ) {
-                $set = 'GeneratedInterface';
-            } elseif (in_array('\GCWorld\ORM\GeneratedMultiInterface',
-                    $implements) || in_array('\GCWorld\ORM\Interfaces\GeneratedMultiInterface', $implements)
-            ) {
-                $set = 'GeneratedMultiInterface';
-            } elseif (defined($class.'::CLASS_PRIMARY')) { //second test, check to see if this has the CLASS_PRIMARY constant.  If so, we're good.
-                $set = 'CLASS_PRIMARY';
-            }
-
-            file_put_contents($path, $set);
-        } else {
-            $set = file_get_contents($path);
+        if (in_array('\GCWorld\ORM\GeneratedInterface',
+                $implements) || in_array('\GCWorld\ORM\Interfaces\GeneratedInterface', $implements)
+        ) {
+            $set = 'GeneratedInterface';
+        } elseif (in_array('\GCWorld\ORM\GeneratedMultiInterface',
+                $implements) || in_array('\GCWorld\ORM\Interfaces\GeneratedMultiInterface', $implements)
+        ) {
+            $set = 'GeneratedMultiInterface';
+        } elseif (defined($class.'::CLASS_PRIMARY')) { //second test, check to see if this has the CLASS_PRIMARY constant.  If so, we're good.
+            $set = 'CLASS_PRIMARY';
         }
 
         if (!class_exists($class)) {
             throw new \Exception('Class Does Not Exist (2)');
         }
+
+        $this->object_types[$class] = $set;
+        $this->objects_changed      = true;
 
         return $set;
     }
