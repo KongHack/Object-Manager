@@ -3,7 +3,7 @@
 A simple object manager that maintains objects in memory
 
 ### Version
-2.1.0
+2.1.0.1
 
 ### Additional Information
 * [GCWorld Public Gitlab](https://gitlab.konghack.com/groups/GCWorld)
