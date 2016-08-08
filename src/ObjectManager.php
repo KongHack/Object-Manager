@@ -22,6 +22,9 @@ class ObjectManager
         }
         if (file_exists($this->config_location.'config.php')) {
             $this->object_types = include($this->config_location.'config.php');
+            if(!is_array($this->object_types)) {
+                $this->object_types = [];
+            }
         } else {
             $this->objects_changed = true;
         }
@@ -30,7 +33,7 @@ class ObjectManager
     public function __destruct()
     {
         if ($this->objects_changed) {
-            $contents = "<?php\n return ".var_export($this->object_types).";\n";
+            $contents = "<?php\n return ".var_export($this->object_types, true).";\n";
             file_put_contents($this->config_location.'config.php', $contents);
         }
     }
