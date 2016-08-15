@@ -1,8 +1,14 @@
 <?php
 namespace GCWorld\ObjectManager;
 
+/**
+ * Class ObjectManager
+ * @package GCWorld\ObjectManager
+ */
 class ObjectManager
 {
+    const APCU_KEY = 'GCObjMan';
+
     protected static $instance        = null;
     protected        $objects         = [];
     protected        $namespaces      = [];
@@ -16,25 +22,36 @@ class ObjectManager
         $this->master_location = __DIR__;
         $this->config_location = $this->master_location.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.
             'config'.DIRECTORY_SEPARATOR;
-
-        if (!is_dir($this->config_location)) {
-            mkdir($this->config_location);
-        }
-        if (file_exists($this->config_location.'config.php')) {
-            $this->object_types = include($this->config_location.'config.php');
-            if(!is_array($this->object_types)) {
+        if(function_exists('apcu_fetch')) {
+            $this->object_types = apcu_fetch(self::APCU_KEY);
+            if(!is_array($this->object_types) || count($this->object_types) < 1) {
                 $this->object_types = [];
+                $this->objects_changed = true;
             }
         } else {
-            $this->objects_changed = true;
+            if (!is_dir($this->config_location)) {
+                mkdir($this->config_location);
+            }
+            if (file_exists($this->config_location.'config.php')) {
+                $this->object_types = include($this->config_location.'config.php');
+                if (!is_array($this->object_types)) {
+                    $this->object_types = [];
+                }
+            } else {
+                $this->objects_changed = true;
+            }
         }
     }
 
     public function __destruct()
     {
         if ($this->objects_changed) {
-            $contents = "<?php\n return ".var_export($this->object_types, true).";\n";
-            file_put_contents($this->config_location.'config.php', $contents);
+            if(function_exists('apcu_store')) {
+                apcu_store(self::APCU_KEY, $this->object_types);
+            } else {
+                $contents = "<?php\n return ".var_export($this->object_types, true).";\n";
+                file_put_contents($this->config_location.'config.php', $contents);
+            }
         }
     }
 
@@ -217,5 +234,18 @@ class ObjectManager
             }
         }
 
+    }
+
+    /**
+     * Will clear the APCU cache as well as the config.php file 
+     */
+    public function purgeConfig()
+    {
+        if (function_exists('apcu_delete')) {
+            apcu_delete(self::APCU_KEY);
+        }
+        if (file_exists($this->config_location.'config.php')) {
+            unlink($this->config_location.'config.php');
+        }
     }
 }
