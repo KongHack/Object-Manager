@@ -9,23 +9,24 @@ class ObjectManager
 {
     const APCU_KEY = 'GCObjMan';
 
-    protected static $instance        = null;
-    protected        $objects         = [];
-    protected        $namespaces      = [];
-    protected        $object_types    = [];
-    protected        $config_location = null;
-    protected        $master_location = null;
-    protected        $objects_changed = false;
+    protected static $instance = null;
+
+    protected $objects         = [];
+    protected $namespaces      = [];
+    protected $object_types    = [];
+    protected $config_location = null;
+    protected $master_location = null;
+    protected $objects_changed = false;
 
     protected function __construct()
     {
         $this->master_location = __DIR__;
         $this->config_location = $this->master_location.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.
             'config'.DIRECTORY_SEPARATOR;
-        if(function_exists('apcu_fetch')) {
+        if (function_exists('apcu_fetch')) {
             $this->object_types = apcu_fetch(self::APCU_KEY);
-            if(!is_array($this->object_types) || count($this->object_types) < 1) {
-                $this->object_types = [];
+            if (!is_array($this->object_types) || count($this->object_types) < 1) {
+                $this->object_types    = [];
                 $this->objects_changed = true;
             }
         } else {
@@ -46,7 +47,7 @@ class ObjectManager
     public function __destruct()
     {
         if ($this->objects_changed) {
-            if(function_exists('apcu_store')) {
+            if (function_exists('apcu_store')) {
                 apcu_store(self::APCU_KEY, $this->object_types);
             } else {
                 $contents = "<?php\n return ".var_export($this->object_types, true).";\n";
@@ -84,10 +85,10 @@ class ObjectManager
     }
 
     /**
-     * @param      $class
-     * @param null $id
-     * @param null $arr
-     * @param bool $forceNew
+     * @param string $class
+     * @param null   $id
+     * @param null   $arr
+     * @param bool   $forceNew
      * @return mixed
      * @throws \Exception
      */
@@ -118,11 +119,48 @@ class ObjectManager
     }
 
     /**
-     * @param            $class
-     * @param bool|false $forceNew
-     * @param            ...$keys
+     * @param string $class
+     * @param string $staticMethod
+     * @param bool   $forceNew
+     * @param int    $id
+     * @param array  ...$args
      * @return mixed
      * @throws \Exception
+     */
+    public function getFactoryObject($class, $staticMethod, $forceNew = false, $id = 0, ...$args)
+    {
+        $type = $this->getClassType($class);
+
+        if ($type == 'GeneratedInterface' || $type == 'CLASS_PRIMARY') {
+            if (!method_exists($class, $staticMethod)) {
+                throw new \Exception('Method "'.$staticMethod.'" does not exist in "'.$class.'"');
+            }
+
+            if (!isset($this->objects[$class][$id]) || $forceNew) {
+                if (count($args) > 0) {
+                    $this->objects[$class][$id] = $class::$staticMethod(...$args);
+                } else {
+                    $this->objects[$class][$id] = $class::$staticMethod();
+                }
+            }
+
+            return $this->objects[$class][$id];
+        } else {
+            // This isn't something we can track, so just return a new one of it.
+            // Always pass both args to be safe.
+            if (count($args) > 0) {
+                return $class::$staticMethod(...$args);
+            } else {
+                return $class::$staticMethod();
+            }
+        }
+    }
+
+    /**
+     * @param string $class
+     * @param bool   $forceNew
+     * @param array  ...$keys
+     * @return mixed
      */
     public function getMultiObject($class, $forceNew = false, ...$keys)
     {
@@ -164,15 +202,16 @@ class ObjectManager
         $set        = 'unknown';
         $implements = class_implements($class);
 
-        if (in_array('\GCWorld\ORM\GeneratedInterface',
-                $implements) || in_array('\GCWorld\ORM\Interfaces\GeneratedInterface', $implements)
+        if (in_array('\GCWorld\ORM\GeneratedInterface', $implements)
+            || in_array('\GCWorld\ORM\Interfaces\GeneratedInterface', $implements)
         ) {
             $set = 'GeneratedInterface';
-        } elseif (in_array('\GCWorld\ORM\GeneratedMultiInterface',
-                $implements) || in_array('\GCWorld\ORM\Interfaces\GeneratedMultiInterface', $implements)
+        } elseif (in_array('\GCWorld\ORM\GeneratedMultiInterface', $implements)
+            || in_array('\GCWorld\ORM\Interfaces\GeneratedMultiInterface', $implements)
         ) {
             $set = 'GeneratedMultiInterface';
-        } elseif (defined($class.'::CLASS_PRIMARY')) { //second test, check to see if this has the CLASS_PRIMARY constant.  If so, we're good.
+        } elseif (defined($class.'::CLASS_PRIMARY')) {
+            //second test, check to see if this has the CLASS_PRIMARY constant.  If so, we're good.
             $set = 'CLASS_PRIMARY';
         }
 
@@ -197,6 +236,7 @@ class ObjectManager
     }
 
     /**
+     * @param string $fullClass
      * @return string
      */
     protected function cacheLocation($fullClass)
@@ -233,11 +273,10 @@ class ObjectManager
                 array_shift($this->objects[$class]);
             }
         }
-
     }
 
     /**
-     * Will clear the APCU cache as well as the config.php file 
+     * Will clear the APCU cache as well as the config.php file
      */
     public function purgeConfig()
     {
