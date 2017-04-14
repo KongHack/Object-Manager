@@ -7,8 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+
 ## [2.2.2](http://gitlab.mhc.org:9990/ace2/ace2-deploy/compare/2.2.1...2.2.2)
  - @GameCharmer renamed a few variables with longer names to pass some PHPMD checks
+
 
 ## [2.2.1](http://gitlab.mhc.org:9990/ace2/ace2-deploy/compare/2.2.0...2.2.1)
  - @GameCharmer Added support for factory style objects
