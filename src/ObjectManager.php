@@ -86,35 +86,35 @@ class ObjectManager
 
     /**
      * @param string $class
-     * @param null   $id
-     * @param null   $arr
+     * @param null   $primaryId
+     * @param null   $rawArray
      * @param bool   $forceNew
      * @return mixed
      * @throws \Exception
      */
-    public function getObject($class, $id = null, $arr = null, $forceNew = false)
+    public function getObject($class, $primaryId = null, $rawArray = null, $forceNew = false)
     {
         $type = $this->getClassType($class);
 
         if ($type == 'GeneratedInterface' || $type == 'CLASS_PRIMARY') {
-            if ($id == null && is_array($arr)) {
+            if ($primaryId == null && is_array($rawArray)) {
                 $primary_key = constant($class.'::CLASS_PRIMARY');
-                $id          = $arr[$primary_key];
+                $primaryId          = $rawArray[$primary_key];
             }
 
-            if (!isset($this->objects[$class][$id]) || $forceNew) {
-                if (is_array($arr)) {
-                    $this->objects[$class][$id] = new $class(null, $arr);
+            if (!isset($this->objects[$class][$primaryId]) || $forceNew) {
+                if (is_array($rawArray)) {
+                    $this->objects[$class][$primaryId] = new $class(null, $rawArray);
                 } else {
-                    $this->objects[$class][$id] = new $class($id);
+                    $this->objects[$class][$primaryId] = new $class($primaryId);
                 }
             }
 
-            return $this->objects[$class][$id];
+            return $this->objects[$class][$primaryId];
         } else {
             // This isn't something we can track, so just return a new one of it.
             // Always pass both args to be safe.
-            return new $class($id, $arr);
+            return new $class($primaryId, $rawArray);
         }
     }
 
@@ -122,12 +122,12 @@ class ObjectManager
      * @param string $class
      * @param string $staticMethod
      * @param bool   $forceNew
-     * @param int    $id
+     * @param int    $primaryId
      * @param array  ...$args
      * @return mixed
      * @throws \Exception
      */
-    public function getFactoryObject($class, $staticMethod, $forceNew = false, $id = 0, ...$args)
+    public function getFactoryObject($class, $staticMethod, $forceNew = false, $primaryId = 0, ...$args)
     {
         $type = $this->getClassType($class);
 
@@ -136,15 +136,15 @@ class ObjectManager
                 throw new \Exception('Method "'.$staticMethod.'" does not exist in "'.$class.'"');
             }
 
-            if (!isset($this->objects[$class][$id]) || $forceNew) {
+            if (!isset($this->objects[$class][$primaryId]) || $forceNew) {
                 if (count($args) > 0) {
-                    $this->objects[$class][$id] = $class::$staticMethod(...$args);
+                    $this->objects[$class][$primaryId] = $class::$staticMethod(...$args);
                 } else {
-                    $this->objects[$class][$id] = $class::$staticMethod();
+                    $this->objects[$class][$primaryId] = $class::$staticMethod();
                 }
             }
 
-            return $this->objects[$class][$id];
+            return $this->objects[$class][$primaryId];
         } else {
             // This isn't something we can track, so just return a new one of it.
             // Always pass both args to be safe.
@@ -227,12 +227,12 @@ class ObjectManager
 
     /**
      * @param $class
-     * @param $id
+     * @param $primaryId
      * @return void
      */
-    public function clearObject($class, $id)
+    public function clearObject($class, $primaryId)
     {
-        unset($this->objects[$class][$id]);
+        unset($this->objects[$class][$primaryId]);
     }
 
     /**
