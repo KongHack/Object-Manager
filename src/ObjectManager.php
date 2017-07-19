@@ -89,7 +89,9 @@ class ObjectManager
      */
     public function addNamespace(string $namespace)
     {
-        array_unshift($this->namespaces, $namespace);
+        if(!in_array($namespace,$this->namespaces)) {
+            array_unshift($this->namespaces, $namespace);
+        }
 
         return $this;
     }
