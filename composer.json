@@ -8,10 +8,17 @@
     }
   ],
   "require": {
-    "php": ">=7.1"
+    "php": ">=7.1",
+    "composer/composer": "^1.1",
+    "composer/installers": "^1.0"
   },
   "autoload": {
     "psr-4": {"GCWorld\\ObjectManager\\": "src/"}
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "GCWorld\\ObjectManager\\ComposerInstaller::setupConfig"
+    ]
   },
   "license":"proprietary"
 }

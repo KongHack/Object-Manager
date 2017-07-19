@@ -3,3 +3,4 @@ generated/*
 vendor/*
 src/Generated/*
 config/*
+!config/config.example.ini
