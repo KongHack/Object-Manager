@@ -29,7 +29,7 @@ class ComposerInstaller
                 return false;   // Silently Fail.
             }
         }
-        if (!file_exists($iniPath.'GCWorld_ORM.ini')) {
+        if (!file_exists($iniPath.'GCWorld_ObjectManager.ini')) {
             $example = file_get_contents($myDir.$ds.'..'.$ds.'config'.$ds.'config.example.ini');
             file_put_contents($iniPath.'GCWorld_ObjectManager.ini', $example);
         }
