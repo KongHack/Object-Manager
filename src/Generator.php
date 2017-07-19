@@ -204,7 +204,6 @@ class Generator
     }
 
 
-
     /**
      * @return array
      */
@@ -234,7 +233,7 @@ class Generator
                         $thisClass = new \ReflectionClass($classString);
                         if (($comment = $thisClass->getDocComment()) !== false) {
                             $phpDoc = new DocBlock($comment);
-                            $config = self::processTags($classString, $phpDoc);
+                            $config = $this->processTags($classString, $phpDoc);
                             if ($config) {
                                 $return[$className] = $config;
                             }
@@ -252,7 +251,7 @@ class Generator
      * @param \phpDocumentor\Reflection\DocBlock $phpDoc
      * @return array|bool
      */
-    private static function processTags($classString, DocBlock $phpDoc)
+    private function processTags($classString, DocBlock $phpDoc)
     {
         if (!$phpDoc->hasTag('om-method')) {
             return false;
