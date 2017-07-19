@@ -47,7 +47,7 @@ class Generator
 
         $this->fileWrite($fh, '<?php'.PHP_EOL);
         $this->fileWrite($fh, 'namespace GCWorld\\ObjectManager\\Generated;'.PHP_EOL.PHP_EOL);
-        $this->fileWrite($fh, 'use \\GCWorld\\ObjectManager\\ObjectManager;'.PHP_EOL);
+        $this->fileWrite($fh, 'use \\GCWorld\\ObjectManager\\ObjectManager;'.PHP_EOL.PHP_EOL);
 
         $this->fileWrite($fh, '/**'.PHP_EOL);
         $this->fileWrite($fh, ' * Class '.self::CLASS_NAME.PHP_EOL);

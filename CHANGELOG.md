@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.3.0](https://github.com/KongHack/Object-Manager/releases/tag/2.3.0)
+ - @GameCharmer Upgraded to PHP 7.1
+ - @GameCharmer Generation System!
+
 ## [2.2.2](https://github.com/KongHack/Object-Manager/releases/tag/2.2.2)
  - @GameCharmer renamed a few variables with longer names to pass some PHPMD checks
 
