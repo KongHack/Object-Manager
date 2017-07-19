@@ -18,6 +18,9 @@ class ObjectManager
     protected $master_location = null;
     protected $objects_changed = false;
 
+    /**
+     * ObjectManager constructor.
+     */
     protected function __construct()
     {
         $this->master_location = __DIR__;
@@ -44,6 +47,9 @@ class ObjectManager
         }
     }
 
+    /**
+     * ObjectManager destructor.
+     */
     public function __destruct()
     {
         if ($this->objects_changed) {
@@ -56,17 +62,21 @@ class ObjectManager
         }
     }
 
+    /**
+     * ObjectManager clone.
+     */
     protected function __clone()
     {
     }
 
     /**
-     * @return ObjectManager|null
+     * @return ObjectManager
      */
     public static function getInstance()
     {
         if (self::$instance == null) {
-            self::$instance = new self();
+            /** @var ObjectManager instance */
+            self::$instance = new static();
             self::$instance->addNamespace(__NAMESPACE__);
         }
 
@@ -74,26 +84,29 @@ class ObjectManager
     }
 
     /**
-     * @param $namespace
+     * @param string $namespace
      * @return $this
      */
-    public function addNamespace($namespace)
+    public function addNamespace(string $namespace)
     {
         array_unshift($this->namespaces, $namespace);
 
-        return self::$instance;
+        return $this;
     }
 
     /**
-     * @param string $class
-     * @param null   $primaryId
-     * @param null   $rawArray
-     * @param bool   $forceNew
+     * @param string     $class
+     * @param mixed      $primaryId
+     * @param array|null $rawArray
+     * @param bool       $forceNew
      * @return mixed
      * @throws \Exception
      */
-    public function getObject($class, $primaryId = null, $rawArray = null, $forceNew = false)
+    public function getObject(string $class, $primaryId = null, array $rawArray = null, bool $forceNew = false)
     {
+        // Handle 0's equating to null
+        $primaryId = ($primaryId === 0 ? null : $primaryId);
+
         $type = $this->getClassType($class);
 
         if ($type == 'GeneratedInterface' || $type == 'CLASS_PRIMARY') {
@@ -127,7 +140,7 @@ class ObjectManager
      * @return mixed
      * @throws \Exception
      */
-    public function getFactoryObject($class, $staticMethod, $forceNew = false, $primaryId = 0, ...$args)
+    public function getFactoryObject(string $class, string $staticMethod, bool $forceNew = false, int $primaryId = 0, ...$args)
     {
         $type = $this->getClassType($class);
 
@@ -162,7 +175,7 @@ class ObjectManager
      * @param array  ...$keys
      * @return mixed
      */
-    public function getMultiObject($class, $forceNew = false, ...$keys)
+    public function getMultiObject(string $class, bool $forceNew = false, ...$keys)
     {
         $type = $this->getClassType($class);
         if ($type == 'GeneratedMultiInterface') {
@@ -177,7 +190,12 @@ class ObjectManager
         }
     }
 
-    private function getClassType($class)
+    /**
+     * @param string $class
+     * @return string
+     * @throws \Exception
+     */
+    private function getClassType(string $class): string
     {
         if (array_key_exists($class, $this->object_types)) {
             return $this->object_types[$class];
@@ -226,11 +244,11 @@ class ObjectManager
     }
 
     /**
-     * @param $class
-     * @param $primaryId
+     * @param string $class
+     * @param mixed $primaryId
      * @return void
      */
-    public function clearObject($class, $primaryId)
+    public function clearObject(string $class, $primaryId): void
     {
         unset($this->objects[$class][$primaryId]);
     }
@@ -239,7 +257,7 @@ class ObjectManager
      * @param string $fullClass
      * @return string
      */
-    protected function cacheLocation($fullClass)
+    protected function cacheLocation(string $fullClass): string
     {
         $generated = $this->master_location.DIRECTORY_SEPARATOR.'Generated/';
         if (!is_dir($generated)) {
@@ -262,11 +280,11 @@ class ObjectManager
 
     /**
      * Removes oldest objects from memory
-     * @param $class
-     * @param $count
+     * @param string $class
+     * @param int $count
      * @return void
      */
-    public function garbageCollect($class, $count)
+    public function garbageCollect(string $class, int $count): void
     {
         if (array_key_exists($class, $this->objects)) {
             while (count($this->objects[$class]) > $count) {
@@ -276,9 +294,19 @@ class ObjectManager
     }
 
     /**
-     * Will clear the APCU cache as well as the config.php file
+     * @return void
      */
-    public function purgeConfig()
+    public function garbageCollectAll()
+    {
+        $this->objects = [];
+    }
+
+    /**
+     * Will clear the APCU cache as well as the config.php file
+     *
+     * @return void
+     */
+    public function purgeConfig(): void
     {
         if (function_exists('apcu_delete')) {
             apcu_delete(self::APCU_KEY);
@@ -287,4 +315,61 @@ class ObjectManager
             unlink($this->config_location.'config.php');
         }
     }
+
+
+    /**
+     * @param string     $modelName
+     * @param int|null   $primary_id
+     * @param array|null $defaults
+     * @param bool       $forceNew
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getModel(string $modelName, int $primary_id = null, array $defaults = null, bool $forceNew = false)
+    {
+        foreach($this->namespaces as $namespace) {
+            if(substr($namespace,-1)!=='\\') {
+                $namespace .= '\\';
+            }
+
+            $className = $namespace.$modelName;
+            if(class_exists($className)) {
+                return $this->getObject($className, $primary_id, $defaults, $forceNew);
+            }
+        }
+        throw new \Exception('Model Not Found: '.$modelName.' within namespace(s) '.print_r($this->namespaces,true));
+    }
+
+    /**
+     * @param string $modelName
+     * @param string $staticMethod
+     * @param bool   $forceNew
+     * @param int    $primaryId
+     * @param mixed  ...$args
+     *
+     * @return mixed
+     */
+    public function getFactoryModelObject(
+        string $modelName,
+        string $staticMethod,
+        bool $forceNew = false,
+        int $primaryId = 0,
+        ...$args
+    ) {
+        foreach($this->namespaces as $namespace) {
+            if(substr($namespace,-1)!=='\\') {
+                $namespace .= '\\';
+            }
+
+            $className = $namespace.$modelName;
+            if(class_exists($className)) {
+                return $this->getFactoryObject($className, $staticMethod, $forceNew, $primaryId, ...$args);
+            }
+        }
+        throw new \Exception('Factory Model Not Found: '.$modelName.' within namespace(s) '.print_r($this->namespaces,true));
+    }
+
+
+
+
 }
