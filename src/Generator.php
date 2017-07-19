@@ -287,7 +287,7 @@ class Generator
         $tmp = explode('\\',$classString);
 
         $config = [
-            'method'    => $phpDoc->getTagsByName('om-method'),
+            'method'    => $phpDoc->getTagsByName('om-method')[0]->getContent(),
             'name'      => array_pop($tmp),
             'namespace' => implode('\\',$tmp),
             'gc'        => 0,
@@ -295,13 +295,13 @@ class Generator
         unset($tmp);
 
         if($phpDoc->hasTag('om-name')) {
-            $config['name'] = $phpDoc->getTagsByName('om-name');
+            $config['name'] = $phpDoc->getTagsByName('om-name')[0]->getContent();
         }
         if($phpDoc->hasTag('om-namespace')) {
-            $config['namespace'] = $phpDoc->getTagsByName('om-namespace');
+            $config['namespace'] = $phpDoc->getTagsByName('om-namespace')[0]->getContent();
         }
         if($phpDoc->hasTag('om-gc')) {
-            $config['gc'] = abs(intval($phpDoc->getTagsByName('om-gc')));
+            $config['gc'] = abs(intval($phpDoc->getTagsByName('om-gc')[0]->getContent()));
         }
 
         return $config;
