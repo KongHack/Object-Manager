@@ -34,10 +34,6 @@ class ComposerInstaller
             file_put_contents($iniPath.'GCWorld_ObjectManager.ini', $example);
         }
         file_put_contents($myDir.$ds.'..'.$ds.'config'.$ds.'config.ini', 'config_path='.$iniPath.'GCWorld_ObjectManager.ini');
-
-        $generator = new Generator();
-        $generator->generate();
-
         return true;
     }
 }
