@@ -18,7 +18,11 @@ class Generator
     protected $config          = [];
     private $open_files        = [];
     private $open_files_level  = [];
+    private $paths             = [];
 
+    /**
+     * Generator constructor.
+     */
     public function __construct()
     {
         $this->master_location  = __DIR__;
@@ -26,37 +30,34 @@ class Generator
         $cConfig      = new Config();
         $config       = $cConfig->getConfig();
         $this->config = $config;
-        $paths        = [];
 
         foreach($this->config as $model => $definition) {
-            // Step 1, eliminate examples
-            if(strpos($model,'Object:ExampleModelName')===0) {
+            if(strpos($model,'ExampleModelName')===0) {
                 unset($this->config[$model]);
                 continue;
             }
-
-            // Step 2, handle paths
-            if($model == 'Paths') {
-                unset($definition['Example1']);
-                unset($definition['Example2']);
-                $paths = array_values($definition);
-                unset($this->config[$model]);
-                continue;
-            }
-
-            // Step 3, eliminate remaining garbage
-            if(strpos($model,'Object:')==false) {
-                unset($this->config[$model]);
-                continue;
-            }
-
-            // Remove the "Object:" part
-            unset($this->config[$model]);
-            $this->config[substr($model,7)] = $definition;
         }
+    }
 
-        if(count($paths) > 0) {
-            $extra = $this->generateAnnotatedConfig($paths);
+    /**
+     * @param string $path
+     * @return $this
+     */
+    public function addPath(string $path)
+    {
+        $this->paths[] = $path;
+
+        return $this;
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function generate()
+    {
+        if(count($this->paths) > 0) {
+            $extra = $this->generateAnnotatedConfig();
             // We are using this order so that the flat file will override
             $this->config = array_merge($extra, $this->config);
         }
@@ -68,13 +69,10 @@ class Generator
             }
         }
 
-    }
 
-    /**
-     * @return bool
-     */
-    public function generate()
-    {
+
+
+
         $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated/';
         if (!is_dir($path)) {
             mkdir($path, 0755, true);
@@ -207,12 +205,12 @@ class Generator
     /**
      * @return array
      */
-    private function generateAnnotatedConfig($paths)
+    private function generateAnnotatedConfig()
     {
         $return = [];
 
-        if (count($paths) > 0) {
-            foreach ($paths as $path) {
+        if (count($this->paths) > 0) {
+            foreach ($this->paths as $path) {
                 $classFiles = self::glob_recursive(rtrim($path, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'*.php');
                 foreach ($classFiles as $file) {
                     $namespace = '';
