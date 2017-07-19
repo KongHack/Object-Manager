@@ -19,6 +19,7 @@ class Generator
     private $open_files        = [];
     private $open_files_level  = [];
     private $paths             = [];
+    private $debug             = false;
 
     /**
      * Generator constructor.
@@ -40,6 +41,14 @@ class Generator
     }
 
     /**
+     * @param bool $debug
+     */
+    public function setDebug(bool $debug)
+    {
+        $this->debug = $debug;
+    }
+
+    /**
      * @param string $path
      * @return $this
      */
@@ -56,10 +65,33 @@ class Generator
      */
     public function generate()
     {
+        if($this->debug) {
+            echo PHP_EOL;
+            echo 'Config',PHP_EOL;
+            print_r($this->config);
+            echo 'Paths',PHP_EOL;
+            print_r($this->paths);
+            echo PHP_EOL;
+        }
+
         if(count($this->paths) > 0) {
             $extra = $this->generateAnnotatedConfig();
+            if($this->debug) {
+                echo PHP_EOL;
+                echo 'EXTRA',PHP_EOL;
+                print_r($extra);
+                echo PHP_EOL;
+            }
+
             // We are using this order so that the flat file will override
             $this->config = array_merge($extra, $this->config);
+        }
+
+        if($this->debug) {
+            echo PHP_EOL;
+            echo 'FINAL CONFIG',PHP_EOL;
+            print_r($this->config);
+            echo PHP_EOL;
         }
 
         // Make sure we have trailing slashes!
@@ -68,9 +100,6 @@ class Generator
                 $definition['namespace'] .= '\\';
             }
         }
-
-
-
 
 
         $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated/';
