@@ -87,13 +87,6 @@ class Generator
             $this->config = array_merge($extra, $this->config);
         }
 
-        if($this->debug) {
-            echo PHP_EOL;
-            echo 'FINAL CONFIG',PHP_EOL;
-            print_r($this->config);
-            echo PHP_EOL;
-        }
-
         // Make sure we have trailing slashes!
         foreach($this->config as &$definition) {
             if(array_key_exists('namespace',$definition) && strpos($definition['namespace'],-1) != '\\') {
@@ -101,6 +94,12 @@ class Generator
             }
         }
 
+        if($this->debug) {
+            echo PHP_EOL;
+            echo 'FINAL CONFIG',PHP_EOL;
+            print_r($this->config);
+            echo PHP_EOL;
+        }
 
         $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated/';
         if (!is_dir($path)) {
@@ -122,13 +121,13 @@ class Generator
 
 
         foreach($this->config as $model => $definition) {
-            if(!array_key_exists('function', $definition)) {
+            if(!array_key_exists('method', $definition)) {
                 continue;
             }
 
             $name = $definition['namespace'].$model;
 
-            switch($definition['function']) {
+            switch($definition['method']) {
                 case 'getModel':
                     $this->fileWrite($fh, PHP_EOL);
                     $this->fileWrite($fh, '/**'.PHP_EOL);
