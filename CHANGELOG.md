@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.4.3](https://github.com/KongHack/Object-Manager/releases/tag/2.4.3)
+ - @GameCharmer Fix weird issue with line breaks
+
+
 ## [2.4.2](https://github.com/KongHack/Object-Manager/releases/tag/2.4.2)
  - @GameCharmer Fix weird ref oddity
 
