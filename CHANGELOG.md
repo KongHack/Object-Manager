@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.4.1](https://github.com/KongHack/Object-Manager/releases/tag/2.4.1)
+ - @GameCharmer Honor the name argument, add in some readme text
+
+
 ## [2.4.0](https://github.com/KongHack/Object-Manager/releases/tag/2.4.0)
  - @GameCharmer add support for annotated models
  
