@@ -2,12 +2,12 @@
 
 A simple object manager that maintains objects in memory
 
-### Version
+#### Version
 2.4.1
 
 
 
-####Annotated ObjectManager Keys
+### Annotated ObjectManager Keys
 
 |                   |                  |                                                        |
 |-------------------|------------------|--------------------------------------------------------|
