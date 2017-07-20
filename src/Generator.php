@@ -126,6 +126,7 @@ class Generator
             }
 
             $name = $definition['namespace'].$model;
+            $fName = empty($definition['name']) ? $model : trim($definition['name']);
 
             switch($definition['method']) {
                 case 'getModel':
@@ -136,7 +137,7 @@ class Generator
                     $this->fileWrite($fh, ' *'.PHP_EOL);
                     $this->fileWrite($fh, ' * @return '.$name.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
-                    $this->fileWrite($fh, 'public function get'.$model.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
+                    $this->fileWrite($fh, 'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
                     if(array_key_exists('gc',$definition) && $definition['gc'] > 0) {
@@ -156,7 +157,7 @@ class Generator
                     $this->fileWrite($fh, ' *'.PHP_EOL);
                     $this->fileWrite($fh, ' * @return '.$name.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
-                    $this->fileWrite($fh, 'public function get'.$model.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
+                    $this->fileWrite($fh, 'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
                     if(array_key_exists('gc',$definition) && $definition['gc'] > 0) {
@@ -294,13 +295,13 @@ class Generator
         unset($tmp);
 
         if($phpDoc->hasTag('om-name')) {
-            $config['name'] = $phpDoc->getTagsByName('om-name')[0]->getContent();
+            $config['name'] = trim($phpDoc->getTagsByName('om-name')[0]->getContent());
         }
         if($phpDoc->hasTag('om-namespace')) {
-            $config['namespace'] = $phpDoc->getTagsByName('om-namespace')[0]->getContent();
+            $config['namespace'] = trim($phpDoc->getTagsByName('om-namespace')[0]->getContent());
         }
         if($phpDoc->hasTag('om-gc')) {
-            $config['gc'] = abs(intval($phpDoc->getTagsByName('om-gc')[0]->getContent()));
+            $config['gc'] = abs(intval(trim($phpDoc->getTagsByName('om-gc')[0]->getContent())));
         }
 
         return $config;
