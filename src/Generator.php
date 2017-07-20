@@ -251,7 +251,7 @@ class Generator
                         }
                         if (substr($buffer, 0, 5) == 'class') {
                             $temp      = explode(' ', $buffer);
-                            $className = $temp[1];
+                            $className = trim($temp[1]);
                             break;
                         }
                     }
@@ -284,7 +284,7 @@ class Generator
             return false;
         }
 
-        $tmp = explode('\\',$classString);
+        $tmp = explode('\\',trim($classString));
 
         $config = [
             'method'    => $phpDoc->getTagsByName('om-method')[0]->getContent(),
