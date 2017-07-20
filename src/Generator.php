@@ -125,7 +125,7 @@ class Generator
                 continue;
             }
 
-            $name = $definition['namespace'].$model;
+            $cName = $definition['namespace'].$model;
             $fName = empty($definition['name']) ? $model : trim($definition['name']);
 
             switch($definition['method']) {
@@ -135,13 +135,13 @@ class Generator
                     $this->fileWrite($fh, ' * @param int|null   $primary_id'.PHP_EOL);
                     $this->fileWrite($fh, ' * @param array|null $defaults'.PHP_EOL);
                     $this->fileWrite($fh, ' *'.PHP_EOL);
-                    $this->fileWrite($fh, ' * @return '.$name.PHP_EOL);
+                    $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
                     $this->fileWrite($fh, 'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
                     if(array_key_exists('gc',$definition) && $definition['gc'] > 0) {
-                        $this->fileWrite($fh, '$this->garbageCollect(\''.$name.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
+                        $this->fileWrite($fh, '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
                     }
                     $this->fileWrite($fh, 'return $this->getModel(\''.$model.'\', $primary_id, $defaults);'.PHP_EOL);
                     $this->fileDrop($fh);
@@ -155,15 +155,15 @@ class Generator
                     $this->fileWrite($fh, ' * @param int|null   $primary_id'.PHP_EOL);
                     $this->fileWrite($fh, ' * @param array|null $defaults'.PHP_EOL);
                     $this->fileWrite($fh, ' *'.PHP_EOL);
-                    $this->fileWrite($fh, ' * @return '.$name.PHP_EOL);
+                    $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
                     $this->fileWrite($fh, 'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
                     if(array_key_exists('gc',$definition) && $definition['gc'] > 0) {
-                        $this->fileWrite($fh, '$this->garbageCollect(\''.$name.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
+                        $this->fileWrite($fh, '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
                     }
-                    $this->fileWrite($fh, 'return $this->getObject(\''.$name.'\', $primary_id, $defaults);'.PHP_EOL);
+                    $this->fileWrite($fh, 'return $this->getObject(\''.$cName.'\', $primary_id, $defaults);'.PHP_EOL);
                     $this->fileDrop($fh);
                     $this->fileWrite($fh, '}'.PHP_EOL);
                     $this->fileWrite($fh, PHP_EOL);
