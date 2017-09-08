@@ -155,7 +155,6 @@ class ObjectManager
             if (!method_exists($class, $staticMethod)) {
                 throw new \Exception('Method "'.$staticMethod.'" does not exist in "'.$class.'"');
             }
-
             if (!isset($this->objects[$class][$primaryId]) || $forceNew) {
                 if (count($args) > 0) {
                     $this->objects[$class][$primaryId] = $class::$staticMethod(...$args);

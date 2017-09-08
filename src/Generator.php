@@ -121,14 +121,14 @@ class Generator
 
 
         foreach($this->config as $model => $definition) {
-            if(!array_key_exists('method', $definition)) {
+            if (!array_key_exists('method', $definition)) {
                 continue;
             }
 
             $cName = $definition['namespace'].$model;
             $fName = empty($definition['name']) ? $model : trim($definition['name']);
 
-            switch($definition['method']) {
+            switch ($definition['method']) {
                 case 'getModel':
                     $this->fileWrite($fh, PHP_EOL);
                     $this->fileWrite($fh, '/**'.PHP_EOL);
@@ -137,17 +137,19 @@ class Generator
                     $this->fileWrite($fh, ' *'.PHP_EOL);
                     $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
-                    $this->fileWrite($fh, 'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
+                    $this->fileWrite($fh,
+                        'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
-                    if(array_key_exists('gc',$definition) && $definition['gc'] > 0) {
-                        $this->fileWrite($fh, '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
+                    if (array_key_exists('gc', $definition) && $definition['gc'] > 0) {
+                        $this->fileWrite($fh,
+                            '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
                     }
                     $this->fileWrite($fh, 'return $this->getModel(\''.$model.'\', $primary_id, $defaults);'.PHP_EOL);
                     $this->fileDrop($fh);
                     $this->fileWrite($fh, '}'.PHP_EOL);
                     $this->fileWrite($fh, PHP_EOL);
-                break;
+                    break;
 
                 case 'getObject':
                     $this->fileWrite($fh, PHP_EOL);
@@ -157,17 +159,76 @@ class Generator
                     $this->fileWrite($fh, ' *'.PHP_EOL);
                     $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
-                    $this->fileWrite($fh, 'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
+                    $this->fileWrite($fh,
+                        'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
-                    if(array_key_exists('gc',$definition) && $definition['gc'] > 0) {
-                        $this->fileWrite($fh, '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
+                    if (array_key_exists('gc', $definition) && $definition['gc'] > 0) {
+                        $this->fileWrite($fh,
+                            '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
                     }
                     $this->fileWrite($fh, 'return $this->getObject(\''.$cName.'\', $primary_id, $defaults);'.PHP_EOL);
                     $this->fileDrop($fh);
                     $this->fileWrite($fh, '}'.PHP_EOL);
                     $this->fileWrite($fh, PHP_EOL);
-                break;
+                    break;
+
+                case 'getFactoryObject':
+                    foreach ($definition['factory'] as $method => $methodArgs) {
+
+                        // Check to see if we have a primary in the args.
+                        $primary_name = null;
+                        $primary_arg  = false;
+                        if(defined($cName.'::CLASS_PRIMARY')) {
+                            $primary_name = constant($cName.'::CLASS_PRIMARY');
+                        }
+
+
+                        $this->fileWrite($fh, PHP_EOL);
+                        $this->fileWrite($fh, '/**'.PHP_EOL);
+                        $maxLeft   = 8;
+                        $variables = [];
+                        foreach ($methodArgs as $methodArg) {
+                            $tmp         = explode(' ', $methodArg);
+                            $maxLeft     = max($maxLeft, strlen($tmp[0]));
+                            $variables[] = $tmp[1];
+                            if($primary_name != null && $tmp[1] == '$'.$primary_name) {
+                                $primary_arg = true;
+                            }
+                        }
+                        if(!$primary_arg) {
+                            $this->fileWrite($fh,
+                                ' * @param '.str_pad('int|null', $maxLeft, ' ', STR_PAD_RIGHT).' $primary_id'.PHP_EOL);
+                        }
+                        foreach ($methodArgs as $methodArg) {
+                            $tmp    = explode(' ', $methodArg);
+                            $tmp[0] = str_pad($tmp[0], $maxLeft, ' ', STR_PAD_RIGHT);
+                            $this->fileWrite($fh, ' * @param '.implode(' ', $tmp).PHP_EOL);
+                        }
+                        $this->fileWrite($fh, ' *'.PHP_EOL);
+                        $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
+                        $this->fileWrite($fh, ' */'.PHP_EOL);
+
+                        $tmp = explode('\\',$cName);
+                        $translatedMethod = array_pop($tmp).str_replace('factory','By',$method);
+                        if(!$primary_arg && !in_array('int $primary_id',$methodArgs)) {
+                            array_unshift($variables, '$primary_id');
+                            array_unshift($methodArgs, 'int $primary_id = 0');
+                        }
+
+                        $this->fileWrite($fh, 'public function get'.$translatedMethod.'('.implode(', ',$methodArgs).')'.PHP_EOL);
+                        $this->fileWrite($fh, '{'.PHP_EOL);
+                        $this->fileBump($fh);
+                        if (array_key_exists('gc', $definition) && $definition['gc'] > 0) {
+                            $this->fileWrite($fh,
+                                '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
+                        }
+                        $this->fileWrite($fh, 'return $this->getFactoryObject(\''.$cName.'\', \''.$method.'\', false, '.implode(', ', $variables).');'.PHP_EOL);
+                        $this->fileDrop($fh);
+                        $this->fileWrite($fh, '}'.PHP_EOL);
+                        $this->fileWrite($fh, PHP_EOL);
+                    }
+                    break;
             }
         }
 
@@ -303,6 +364,28 @@ class Generator
         if($phpDoc->hasTag('om-gc')) {
             $config['gc'] = abs(intval(trim($phpDoc->getTagsByName('om-gc')[0]->getContent())));
         }
+
+        $factory = [];
+        if(in_array($config['method'],['getFactoryObject','getFactoryModelObject'])) {
+            // Handle factory stuff
+            $i = 0;
+            while($i < 1000) {
+                ++$i;
+                $method = $phpDoc->getTagsByName('om-factory-'.$i.'-method');
+                if(!$method) {
+                    break;
+                }
+                $methodName = $method[0]->getContent();
+                $methodArgs = [];
+                $args       = $phpDoc->getTagsByName('om-factory-'.$i.'-arg');
+                foreach($args as $arg) {
+                    $methodArgs[] = $arg->getContent();
+                }
+
+                $factory[$methodName] = $methodArgs;
+            }
+        }
+        $config['factory'] = $factory;
 
         return $config;
     }
