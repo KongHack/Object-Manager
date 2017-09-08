@@ -174,16 +174,14 @@ class Generator
                     break;
 
                 case 'getFactoryObject':
+                    // Check to see if we have a primary in the args.
+                    $primary_name = null;
+                    $primary_arg  = false;
+                    if(defined($cName.'::CLASS_PRIMARY')) {
+                        $primary_name = constant($cName.'::CLASS_PRIMARY');
+                    }
+
                     foreach ($definition['factory'] as $method => $methodArgs) {
-
-                        // Check to see if we have a primary in the args.
-                        $primary_name = null;
-                        $primary_arg  = false;
-                        if(defined($cName.'::CLASS_PRIMARY')) {
-                            $primary_name = constant($cName.'::CLASS_PRIMARY');
-                        }
-
-
                         $this->fileWrite($fh, PHP_EOL);
                         $this->fileWrite($fh, '/**'.PHP_EOL);
                         $maxLeft   = 8;
