@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.4.4](https://github.com/KongHack/Object-Manager/releases/tag/2.4.4)
+ - @GameCharmer Support for factory objects.  See updated readme for usage
+
+
 ## [2.4.3](https://github.com/KongHack/Object-Manager/releases/tag/2.4.3)
  - @GameCharmer Fix weird issue with line breaks
 
