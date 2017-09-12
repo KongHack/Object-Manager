@@ -221,6 +221,10 @@ class Generator
                             $this->fileWrite($fh,
                                 '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
                         }
+                        if($primary_arg && count($variables) == 1) {
+                            $variables = array_values($variables);
+                            $variables[] = $variables[0];
+                        }
                         $this->fileWrite($fh, 'return $this->getFactoryObject(\''.$cName.'\', \''.$method.'\', false, '.implode(', ', $variables).');'.PHP_EOL);
                         $this->fileDrop($fh);
                         $this->fileWrite($fh, '}'.PHP_EOL);
