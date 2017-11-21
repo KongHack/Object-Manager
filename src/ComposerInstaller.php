@@ -2,6 +2,7 @@
 namespace GCWorld\ObjectManager;
 
 use Composer\Script\Event;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class ComposerInstaller
@@ -29,11 +30,13 @@ class ComposerInstaller
                 return false;   // Silently Fail.
             }
         }
-        if (!file_exists($iniPath.'GCWorld_ObjectManager.ini')) {
-            $example = file_get_contents($myDir.$ds.'..'.$ds.'config'.$ds.'config.example.ini');
-            file_put_contents($iniPath.'GCWorld_ObjectManager.ini', $example);
+        if (!file_exists($iniPath.'GCWorld_ObjectManager.yml')) {
+            $example = file_get_contents($myDir.$ds.'..'.$ds.'config'.$ds.'config.example.yml');
+            file_put_contents($iniPath.'GCWorld_ObjectManager.yml', $example);
         }
-        file_put_contents($myDir.$ds.'..'.$ds.'config'.$ds.'config.ini', 'config_path='.$iniPath.'GCWorld_ObjectManager.ini');
+
+        $config = ['config_path' => $iniPath.'GCWorld_ObjectManager.yml'];
+        file_put_contents($myDir.$ds.'..'.$ds.'config'.$ds.'config.yml', Yaml::dump($config));
         return true;
     }
 }

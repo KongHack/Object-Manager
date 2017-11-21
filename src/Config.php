@@ -2,6 +2,7 @@
 namespace GCWorld\ObjectManager;
 
 use Exception;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class Config
@@ -21,20 +22,21 @@ class Config
     public function __construct()
     {
         $file  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-        $file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
+        $file .= 'config'.DIRECTORY_SEPARATOR.'config.yml';
         if (!file_exists($file)) {
             throw new Exception('Config File Not Found');
         }
-        $config = parse_ini_file($file, true);
+
+        $config = Yaml::parse(file_get_contents($file));
         if (isset($config['config_path'])) {
             $file   = $config['config_path'];
-            $config = parse_ini_file($file, true);
+            $config = Yaml::parse(file_get_contents($file));
         }
 
         // Get the example config, make sure we have all variables.
         $example  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-        $example .= 'config/config.example.ini';
-        $exConfig = parse_ini_file($example, true);
+        $example .= 'config/config.example.yml';
+        $exConfig = Yaml::parse(file_get_contents($example));
 
         $reSave = false;
         foreach ($exConfig as $k => $v) {
@@ -52,7 +54,7 @@ class Config
         }
 
         if ($reSave) {
-            $this->writeIniFile($config, $file, true);
+            file_put_contents($file, Yaml::dump($config, 4));
         }
 
         $this->config = $config;
@@ -64,58 +66,5 @@ class Config
     public function getConfig()
     {
         return $this->config;
-    }
-
-    /**
-     * @url          http://stackoverflow.com/questions/1268378/create-ini-file-write-values-in-php
-     * @param array  $assoc_arr
-     * @param string $path
-     * @param bool   $has_sections
-     * @return bool|int
-     */
-    private function writeIniFile(array $assoc_arr, string $path, bool $has_sections = false)
-    {
-        $content = "";
-        if ($has_sections) {
-            foreach ($assoc_arr as $key => $elem) {
-                if (is_array($elem)) {
-                    $content .= "\n[".$key."]\n";
-                    foreach ($elem as $key2 => $elem2) {
-                        if (is_array($elem2)) {
-                            for ($i = 0; $i < count($elem2); $i++) {
-                                $content .= $key2."[]=\"".$elem2[$i]."\"\n";
-                            }
-                        } elseif ($elem2 == "") {
-                            $content .= $key2."=\n";
-                        } else {
-                            $content .= $key2."=\"".$elem2."\"\n";
-                        }
-                    }
-                } else {
-                    $content .= $key."=\"".$elem."\"\n";
-                }
-            }
-        } else {
-            foreach ($assoc_arr as $key => $elem) {
-                if (is_array($elem)) {
-                    for ($i = 0; $i < count($elem); $i++) {
-                        $content .= $key."[]=\"".$elem[$i]."\"\n";
-                    }
-                } elseif ($elem == "") {
-                    $content .= $key."=\n";
-                } else {
-                    $content .= $key."=\"".$elem."\"\n";
-                }
-            }
-        }
-
-        if (!$handle = fopen($path, 'w')) {
-            return false;
-        }
-
-        $success = fwrite($handle, $content);
-        fclose($handle);
-
-        return $success;
     }
 }
