@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.5.0](https://github.com/KongHack/Object-Manager/releases/tag/2.5.0)
+ - @GameCharmer Switch config to YML
+
+
 ## [2.4.5](https://github.com/KongHack/Object-Manager/releases/tag/2.4.5)
  - @GameCharmer Generator Factory ID Fix
  
