@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.5.1](https://github.com/KongHack/Object-Manager/releases/tag/2.5.1)
+ - @GameCharmer Update DocBlock Library
+
+
 ## [2.5.0](https://github.com/KongHack/Object-Manager/releases/tag/2.5.0)
  - @GameCharmer Switch config to YML
 
