@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.5.2](https://github.com/KongHack/Object-Manager/releases/tag/2.5.2)
+ - @GameCharmer Resolve remaining issues with DocBlocks
+
+
 ## [2.5.1](https://github.com/KongHack/Object-Manager/releases/tag/2.5.1)
  - @GameCharmer Update DocBlock Library
 

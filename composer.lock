@@ -384,16 +384,16 @@
         },
         {
             "name": "gcworld/utilities",
-            "version": "1.2.4",
+            "version": "1.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Utilities.git",
-                "reference": "900d7cbe4fec2829ef820e1955345b6fbb98282f"
+                "reference": "712a2d4513c0f66c81d758803c495b85926f5041"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Utilities/zipball/900d7cbe4fec2829ef820e1955345b6fbb98282f",
-                "reference": "900d7cbe4fec2829ef820e1955345b6fbb98282f",
+                "url": "https://api.github.com/repos/KongHack/Utilities/zipball/712a2d4513c0f66c81d758803c495b85926f5041",
+                "reference": "712a2d4513c0f66c81d758803c495b85926f5041",
                 "shasum": ""
             },
             "require": {
@@ -416,7 +416,7 @@
                 }
             ],
             "description": "GCWorld Industries standard Utilities pack",
-            "time": "2017-09-30T17:05:59+00:00"
+            "time": "2018-02-05T14:46:46+00:00"
         },
         {
             "name": "justinrainbow/json-schema",

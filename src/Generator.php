@@ -299,8 +299,9 @@ class Generator
      */
     private function generateAnnotatedConfig()
     {
-        $return = [];
+        $cPhpDocFactory  = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
 
+        $return = [];
         if (count($this->paths) > 0) {
             foreach ($this->paths as $path) {
                 $classFiles = self::glob_recursive(rtrim($path, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'*.php');
@@ -322,7 +323,7 @@ class Generator
                     if (class_exists($classString)) {
                         $thisClass = new \ReflectionClass($classString);
                         if (($comment = $thisClass->getDocComment()) !== false) {
-                            $phpDoc = new DocBlock($comment);
+                            $phpDoc = $cPhpDocFactory->create($comment);
                             $config = $this->processTags($classString, $phpDoc);
                             if ($config) {
                                 $return[$className] = $config;
@@ -350,7 +351,7 @@ class Generator
         $tmp = explode('\\',trim($classString));
 
         $config = [
-            'method'    => $phpDoc->getTagsByName('om-method')[0]->getContent(),
+            'method'    => (string) $phpDoc->getTagsByName('om-method')[0],
             'name'      => array_pop($tmp),
             'namespace' => implode('\\',$tmp),
             'gc'        => 0,
@@ -358,13 +359,13 @@ class Generator
         unset($tmp);
 
         if($phpDoc->hasTag('om-name')) {
-            $config['name'] = trim($phpDoc->getTagsByName('om-name')[0]->getContent());
+            $config['name'] = trim((string) $phpDoc->getTagsByName('om-name')[0]);
         }
         if($phpDoc->hasTag('om-namespace')) {
-            $config['namespace'] = trim($phpDoc->getTagsByName('om-namespace')[0]->getContent());
+            $config['namespace'] = trim((string) $phpDoc->getTagsByName('om-namespace')[0]);
         }
         if($phpDoc->hasTag('om-gc')) {
-            $config['gc'] = abs(intval(trim($phpDoc->getTagsByName('om-gc')[0]->getContent())));
+            $config['gc'] = abs(intval(trim((string) $phpDoc->getTagsByName('om-gc')[0])));
         }
 
         $factory = [];
@@ -377,11 +378,11 @@ class Generator
                 if(!$method) {
                     break;
                 }
-                $methodName = $method[0]->getContent();
+                $methodName = (string) $method[0];
                 $methodArgs = [];
                 $args       = $phpDoc->getTagsByName('om-factory-'.$i.'-arg');
                 foreach($args as $arg) {
-                    $methodArgs[] = $arg->getContent();
+                    $methodArgs[] = (string) $arg;
                 }
 
                 $factory[$methodName] = $methodArgs;
