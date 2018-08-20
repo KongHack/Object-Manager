@@ -3,7 +3,7 @@
 A simple object manager that maintains objects in memory
 
 #### Version
-2.5.2
+2.5.3
 
 
 
