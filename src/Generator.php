@@ -306,6 +306,9 @@ class Generator
             foreach ($this->paths as $path) {
                 $classFiles = self::glob_recursive(rtrim($path, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'*.php');
                 foreach ($classFiles as $file) {
+                    if($this->debug) {
+                        echo ' - Analyzing Class File: ',$file,PHP_EOL;
+                    }
                     $namespace = '';
                     $className = '';
                     $fh        = fopen($file, 'r');
@@ -320,6 +323,9 @@ class Generator
                         }
                     }
                     $classString = trim('\\'.$namespace.'\\'.$className);
+                    if($this->debug) {
+                        echo ' - - Found FQCN: ',$classString,PHP_EOL;
+                    }
                     if (class_exists($classString)) {
                         $thisClass = new \ReflectionClass($classString);
                         if (($comment = $thisClass->getDocComment()) !== false) {
@@ -327,8 +333,12 @@ class Generator
                             $config = $this->processTags($classString, $phpDoc);
                             if ($config) {
                                 $return[$className] = $config;
+                            } elseif($this->debug) {
+                                echo ' - [!!] No Config Found', PHP_EOL;
                             }
                         }
+                    } elseif($this->debug) {
+                        echo ' - [!!] CLASS NOT FOUND',PHP_EOL;
                     }
                 }
             }
