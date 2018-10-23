@@ -21,22 +21,22 @@ class Config
      */
     public function __construct()
     {
-        $file  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $file  = __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $file .= 'config'.DIRECTORY_SEPARATOR.'config.yml';
         if (!file_exists($file)) {
             throw new Exception('Config File Not Found');
         }
 
-        $config = Yaml::parse(file_get_contents($file));
+        $config = Yaml::parseFile($file);
         if (isset($config['config_path'])) {
-            $file   = $config['config_path'];
-            $config = Yaml::parse(file_get_contents($file));
+            $file   = __DIR__.DIRECTORY_SEPARATOR.$config['config_path'];
+            $config = Yaml::parseFile($file);
         }
 
         // Get the example config, make sure we have all variables.
-        $example  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $example  = __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $example .= 'config/config.example.yml';
-        $exConfig = Yaml::parse(file_get_contents($example));
+        $exConfig = Yaml::parseFile($example);
 
         $reSave = false;
         foreach ($exConfig as $k => $v) {

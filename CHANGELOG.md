@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.5.4](https://github.com/KongHack/Object-Manager/releases/tag/2.5.4)
+ - @GameCharmer convert config pathing to relative
+
+
 ## [2.5.3](https://github.com/KongHack/Object-Manager/releases/tag/2.5.3)
  - @GameCharmer add some additional debug output to the generator
  
