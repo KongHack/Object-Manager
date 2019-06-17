@@ -3,6 +3,7 @@ namespace GCWorld\ObjectManager;
 
 use GCWorld\Utilities\General;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlockFactory;
 
 /**
  * Class Generator
@@ -132,13 +133,13 @@ class Generator
                 case 'getModel':
                     $this->fileWrite($fh, PHP_EOL);
                     $this->fileWrite($fh, '/**'.PHP_EOL);
-                    $this->fileWrite($fh, ' * @param int|null   $primary_id'.PHP_EOL);
+                    $this->fileWrite($fh, ' * @param mixed|null $primary_id'.PHP_EOL);
                     $this->fileWrite($fh, ' * @param array|null $defaults'.PHP_EOL);
                     $this->fileWrite($fh, ' *'.PHP_EOL);
                     $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
                     $this->fileWrite($fh,
-                        'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
+                        'public function get'.$fName.'($primary_id = null, array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
                     if (array_key_exists('gc', $definition) && $definition['gc'] > 0) {
@@ -154,13 +155,13 @@ class Generator
                 case 'getObject':
                     $this->fileWrite($fh, PHP_EOL);
                     $this->fileWrite($fh, '/**'.PHP_EOL);
-                    $this->fileWrite($fh, ' * @param int|null   $primary_id'.PHP_EOL);
+                    $this->fileWrite($fh, ' * @param mixed|null $primary_id'.PHP_EOL);
                     $this->fileWrite($fh, ' * @param array|null $defaults'.PHP_EOL);
                     $this->fileWrite($fh, ' *'.PHP_EOL);
                     $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
                     $this->fileWrite($fh,
-                        'public function get'.$fName.'(int $primary_id = null, array $defaults = null)'.PHP_EOL);
+                        'public function get'.$fName.'($primary_id = null, array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
                     if (array_key_exists('gc', $definition) && $definition['gc'] > 0) {
@@ -196,7 +197,7 @@ class Generator
                         }
                         if(!$primary_arg) {
                             $this->fileWrite($fh,
-                                ' * @param '.str_pad('int|null', $maxLeft, ' ', STR_PAD_RIGHT).' $primary_id'.PHP_EOL);
+                                ' * @param '.str_pad('mixed|null', $maxLeft, ' ', STR_PAD_RIGHT).' $primary_id'.PHP_EOL);
                         }
                         foreach ($methodArgs as $methodArg) {
                             $tmp    = explode(' ', $methodArg);
@@ -209,9 +210,9 @@ class Generator
 
                         $tmp = explode('\\',$cName);
                         $translatedMethod = array_pop($tmp).str_replace('factory','By',$method);
-                        if(!$primary_arg && !in_array('int $primary_id',$methodArgs)) {
+                        if(!$primary_arg && !in_array('$primary_id',$methodArgs)) {
                             array_unshift($variables, '$primary_id');
-                            array_unshift($methodArgs, 'int $primary_id = 0');
+                            array_unshift($methodArgs, '$primary_id = null');
                         }
 
                         $this->fileWrite($fh, 'public function get'.$translatedMethod.'('.implode(', ',$methodArgs).')'.PHP_EOL);
@@ -299,7 +300,7 @@ class Generator
      */
     private function generateAnnotatedConfig()
     {
-        $cPhpDocFactory  = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
+        $cPhpDocFactory  = DocBlockFactory::createInstance();
 
         $return = [];
         if (count($this->paths) > 0) {
@@ -348,8 +349,8 @@ class Generator
     }
 
     /**
-     * @param string                             $classString
-     * @param \phpDocumentor\Reflection\DocBlock $phpDoc
+     * @param string   $classString
+     * @param DocBlock $phpDoc
      * @return array|bool
      */
     private function processTags($classString, DocBlock $phpDoc)
