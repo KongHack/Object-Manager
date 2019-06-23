@@ -97,6 +97,18 @@ class ObjectManager
     }
 
     /**
+     * @return array
+     */
+    public function debugGetEverything()
+    {
+        return [
+            'objects'      => $this->objects,
+            'namespaces'   => $this->namespaces,
+            'object_types' => $this->object_types,
+        ];
+    }
+
+    /**
      * @param string     $class
      * @param mixed      $primaryId
      * @param array|null $rawArray
@@ -108,24 +120,28 @@ class ObjectManager
     {
         // Handle 0's equating to null
         $primaryId = ($primaryId === 0 ? null : $primaryId);
+        // Same for empty strings
+        $primaryId = ($primaryId === '' ? null : $primaryId);
 
         $type = $this->getClassType($class);
 
         if ($type == 'GeneratedInterface' || $type == 'CLASS_PRIMARY') {
-            if ($primaryId == null && is_array($rawArray)) {
+            if ($primaryId === null && is_array($rawArray)) {
                 $primary_key = constant($class.'::CLASS_PRIMARY');
                 $primaryId   = $rawArray[$primary_key];
             }
 
-            if (!isset($this->objects[$class][$primaryId]) || $forceNew) {
+            $key = empty($primaryId) ? 'OM_NEW' : $primaryId;
+
+            if (!isset($this->objects[$class][$key]) || $forceNew) {
                 if (is_array($rawArray)) {
-                    $this->objects[$class][$primaryId] = new $class(null, $rawArray);
+                    $this->objects[$class][$key] = new $class(null, $rawArray);
                 } else {
-                    $this->objects[$class][$primaryId] = new $class($primaryId);
+                    $this->objects[$class][$key] = new $class($primaryId);
                 }
             }
 
-            return $this->objects[$class][$primaryId];
+            return $this->objects[$class][$key];
         } else {
             // This isn't something we can track, so just return a new one of it.
             // Always pass both args to be safe.
@@ -137,7 +153,7 @@ class ObjectManager
      * @param string $class
      * @param string $staticMethod
      * @param bool   $forceNew
-     * @param int    $primaryId
+     * @param mixed  $primaryId
      * @param mixed  ...$args
      * @return mixed
      * @throws \Exception
@@ -146,12 +162,18 @@ class ObjectManager
         string $class,
         string $staticMethod,
         bool $forceNew = false,
-        int $primaryId = 0,
+        $primaryId = null,
         ...$args
     ){
+        // Handle 0's equating to null
+        $primaryId = ($primaryId === 0 ? null : $primaryId);
+        // Same for empty strings
+        $primaryId = ($primaryId === '' ? null : $primaryId);
+
+
         $type = $this->getClassType($class);
 
-        if ($type == 'GeneratedInterface' || $type == 'CLASS_PRIMARY') {
+        if ($type === 'GeneratedInterface' || $type === 'CLASS_PRIMARY') {
             if (!method_exists($class, $staticMethod)) {
                 throw new \Exception('Method "'.$staticMethod.'" does not exist in "'.$class.'"');
             }

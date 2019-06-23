@@ -8,6 +8,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.5.6](https://github.com/KongHack/Object-Manager/releases/tag/2.5.6)
+ - @GameCharmer support blank primary key consistency in getObject
+ - @GameCharmer add debug method
+
+
+
 ## [2.5.5](https://github.com/KongHack/Object-Manager/releases/tag/2.5.5)
  - @GameCharmer support non-integer primary keys
 
