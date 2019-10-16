@@ -90,7 +90,7 @@ class Generator
 
         // Make sure we have trailing slashes!
         foreach($this->config as $model => $definition) {
-            if(array_key_exists('namespace',$definition) && strpos($definition['namespace'],-1) != '\\') {
+            if(array_key_exists('namespace',$definition) && strpos((string) $definition['namespace'],-1) != '\\') {
                 $this->config[$model]['namespace'] .= '\\';
             }
         }
