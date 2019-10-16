@@ -8,8 +8,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.5.8](https://github.com/KongHack/Object-Manager/releases/tag/2.5.8)
+ - @GameCharmer Fix issue where a strpos should have been a substr
+
+
 ## [2.5.7](https://github.com/KongHack/Object-Manager/releases/tag/2.5.7)
- - @GameCharmer PHP7.3 does not like that I'm using a strpos on a string value from an associative array, so explicitly casting.
+ - @GameCharmer BROKEN, DO NOT USE
 
 
 
