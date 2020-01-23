@@ -8,12 +8,12 @@
     }
   ],
   "require": {
-    "php": ">=7.1",
+    "php": ">=7.2.5",
     "composer/composer": "^1.1",
     "composer/installers": "^1.0",
     "gcworld/utilities": "~1.0",
     "phpdocumentor/reflection-docblock": "^4.0",
-    "symfony/yaml": "^3.3"
+    "symfony/yaml": "^5.0"
   },
   "autoload": {
     "psr-4": {"GCWorld\\ObjectManager\\": "src/"}
