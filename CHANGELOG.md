@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.6.1](https://github.com/KongHack/Object-Manager/releases/tag/2.6.1)
+- @GameCharmer Support for YAML 4 or 5
+
+
 
 ## [2.6.0](https://github.com/KongHack/Object-Manager/releases/tag/2.6.0)
  - @GameCharmer Updated min php version from 7.1 to 7.2.5
