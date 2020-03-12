@@ -347,13 +347,13 @@ class ObjectManager
 
     /**
      * @param string     $modelName
-     * @param int|null   $primary_id
+     * @param mixed|null $primary_id
      * @param array|null $defaults
      * @param bool       $forceNew
      * @return mixed
      * @throws \Exception
      */
-    public function getModel(string $modelName, int $primary_id = null, array $defaults = null, bool $forceNew = false)
+    public function getModel(string $modelName, $primary_id = null, array $defaults = null, bool $forceNew = false)
     {
         foreach ($this->namespaces as $namespace) {
             if (substr($namespace, -1) !== '\\') {
