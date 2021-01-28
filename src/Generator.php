@@ -1,7 +1,7 @@
 <?php
 namespace GCWorld\ObjectManager;
 
-use GCWorld\Utilities\General;
+use GCWorld\Utilities\Traits\General;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 

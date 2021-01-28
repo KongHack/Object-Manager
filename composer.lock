@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ce67fa8bd8c93081306e54166fa4c4c8",
+    "content-hash": "e853e8240fe471c51469ee5cd2c0ec37",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -404,19 +404,21 @@
         },
         {
             "name": "gcworld/utilities",
-            "version": "1.2.6",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Utilities.git",
-                "reference": "452fa8d83cf2c98eca14d5ecde8b7117a7979b7d"
+                "reference": "48a1ba519e7e2b1e327bcba9ff4e126153b094fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Utilities/zipball/452fa8d83cf2c98eca14d5ecde8b7117a7979b7d",
-                "reference": "452fa8d83cf2c98eca14d5ecde8b7117a7979b7d",
+                "url": "https://api.github.com/repos/KongHack/Utilities/zipball/48a1ba519e7e2b1e327bcba9ff4e126153b094fb",
+                "reference": "48a1ba519e7e2b1e327bcba9ff4e126153b094fb",
                 "shasum": ""
             },
             "require": {
+                "ext-curl": "*",
+                "ext-gd": "*",
                 "php": ">=7.1"
             },
             "type": "library",
@@ -438,9 +440,9 @@
             "description": "GCWorld Industries standard Utilities pack",
             "support": {
                 "issues": "https://github.com/KongHack/Utilities/issues",
-                "source": "https://github.com/KongHack/Utilities/tree/1.2.6"
+                "source": "https://github.com/KongHack/Utilities/tree/2.0.0"
             },
-            "time": "2019-03-01T13:09:20+00:00"
+            "time": "2021-01-27T14:42:19+00:00"
         },
         {
             "name": "justinrainbow/json-schema",

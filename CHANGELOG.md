@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.7.2](https://github.com/KongHack/Object-Manager/releases/tag/2.7.2)
+ - @GameCharmer Update Utilities
+
+
+
 ## [2.7.1](https://github.com/KongHack/Object-Manager/releases/tag/2.7.1)
  - @GameCharmer Update Composer Dependencies
 
