@@ -381,7 +381,6 @@ class ObjectManager
         string $modelName,
         string $staticMethod,
         bool $forceNew = false,
-        int $primaryId = 0,
         ...$args
     ){
         foreach ($this->namespaces as $namespace) {
@@ -391,7 +390,7 @@ class ObjectManager
 
             $className = $namespace.$modelName;
             if (class_exists($className)) {
-                return $this->getFactoryObject($className, $staticMethod, $forceNew, $primaryId, ...$args);
+                return $this->getFactoryObject($className, $staticMethod, $forceNew, ...$args);
             }
         }
         throw new \Exception('Factory Model Not Found: '.$modelName.' within namespace(s) '.print_r($this->namespaces,

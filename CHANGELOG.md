@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.8.0](https://github.com/KongHack/Object-Manager/releases/tag/2.8.0)
+ - @GameCharmer Eliminate primary_id from factory method builder for PHP 8.0
+
+
+
 ## [2.7.2](https://github.com/KongHack/Object-Manager/releases/tag/2.7.2)
  - @GameCharmer Update Utilities
 

@@ -210,10 +210,6 @@ class Generator
 
                         $tmp = explode('\\',$cName);
                         $translatedMethod = array_pop($tmp).str_replace('factory','By',$method);
-                        if(!$primary_arg && !in_array('$primary_id',$methodArgs)) {
-                            array_unshift($variables, '$primary_id');
-                            array_unshift($methodArgs, '$primary_id = null');
-                        }
 
                         $this->fileWrite($fh, 'public function get'.$translatedMethod.'('.implode(', ',$methodArgs).')'.PHP_EOL);
                         $this->fileWrite($fh, '{'.PHP_EOL);
