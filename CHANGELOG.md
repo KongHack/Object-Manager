@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.8.3](https://github.com/KongHack/Object-Manager/releases/tag/2.8.3)
+- @GameCharmer Update composer/composer
+
+
+
 ## [2.8.2](https://github.com/KongHack/Object-Manager/releases/tag/2.8.2)
 - @GameCharmer Update composer dependencies (Dependabot)
 

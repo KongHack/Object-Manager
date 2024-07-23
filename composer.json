@@ -9,7 +9,7 @@
   ],
   "require": {
     "php": ">=7.2.5",
-    "composer/composer": "^2.0",
+    "composer/composer": "^2.7",
     "gcworld/utilities": ">=2.0",
     "phpdocumentor/reflection-docblock": "^5.2",
     "symfony/yaml": "^6.0"
