@@ -139,7 +139,7 @@ class Generator
                     $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
                     $this->fileWrite($fh,
-                        'public function get'.$fName.'($primary_id = null, array $defaults = null)'.PHP_EOL);
+                        'public function get'.$fName.'(mixed $primary_id = null, ?array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
                     if (array_key_exists('gc', $definition) && $definition['gc'] > 0) {
@@ -161,7 +161,7 @@ class Generator
                     $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
                     $this->fileWrite($fh, ' */'.PHP_EOL);
                     $this->fileWrite($fh,
-                        'public function get'.$fName.'($primary_id = null, array $defaults = null)'.PHP_EOL);
+                        'public function get'.$fName.'(mixed $primary_id = null, ?array $defaults = null)'.PHP_EOL);
                     $this->fileWrite($fh, '{'.PHP_EOL);
                     $this->fileBump($fh);
                     if (array_key_exists('gc', $definition) && $definition['gc'] > 0) {
@@ -240,9 +240,9 @@ class Generator
 
     /**
      * @param string $filename
-     * @return mixed
+     * @return string
      */
-    protected function fileOpen(string $filename)
+    protected function fileOpen(string $filename): string
     {
         $key                          = str_replace('.', '', microtime(true));
         $this->open_files[$key]       = fopen($filename, 'w');
@@ -256,7 +256,7 @@ class Generator
      * @param string $string
      * @return void
      */
-    protected function fileWrite($key, string $string)
+    protected function fileWrite($key, string $string): void
     {
         fwrite($this->open_files[$key], str_repeat(' ', $this->open_files_level[$key] * 4).$string);
     }
@@ -265,7 +265,7 @@ class Generator
      * @param mixed $key
      * @return void
      */
-    protected function fileBump($key)
+    protected function fileBump($key): void
     {
         ++$this->open_files_level[$key];
     }
@@ -274,7 +274,7 @@ class Generator
      * @param mixed $key
      * @return void
      */
-    protected function fileDrop($key)
+    protected function fileDrop($key): void
     {
         --$this->open_files_level[$key];
     }
@@ -283,7 +283,7 @@ class Generator
      * @param mixed $key
      * @return void
      */
-    protected function fileClose($key)
+    protected function fileClose($key): void
     {
         fclose($this->open_files[$key]);
         unset($this->open_files[$key]);
@@ -294,7 +294,7 @@ class Generator
     /**
      * @return array
      */
-    private function generateAnnotatedConfig()
+    private function generateAnnotatedConfig(): array
     {
         $cPhpDocFactory  = DocBlockFactory::createInstance();
 
@@ -349,7 +349,7 @@ class Generator
      * @param DocBlock $phpDoc
      * @return array|bool
      */
-    private function processTags($classString, DocBlock $phpDoc)
+    private function processTags(string $classString, DocBlock $phpDoc)
     {
         if (!$phpDoc->hasTag('om-method')) {
             return false;

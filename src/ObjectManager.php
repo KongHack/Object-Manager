@@ -1,6 +1,8 @@
 <?php
 namespace GCWorld\ObjectManager;
 
+use Exception;
+
 /**
  * Class ObjectManager
  * @package GCWorld\ObjectManager
@@ -114,9 +116,9 @@ class ObjectManager
      * @param array|null $rawArray
      * @param bool       $forceNew
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getObject(string $class, $primaryId = null, array $rawArray = null, bool $forceNew = false)
+    public function getObject(string $class, mixed $primaryId = null, array $rawArray = null, bool $forceNew = false)
     {
         // Handle 0's equating to null
         $primaryId = ($primaryId === 0 ? null : $primaryId);
@@ -156,13 +158,13 @@ class ObjectManager
      * @param mixed  $primaryId
      * @param mixed  ...$args
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function getFactoryObject(
         string $class,
         string $staticMethod,
         bool $forceNew = false,
-        $primaryId = null,
+        mixed $primaryId = null,
         ...$args
     ){
         // Handle 0's equating to null
@@ -175,7 +177,7 @@ class ObjectManager
 
         if ($type === 'GeneratedInterface' || $type === 'CLASS_PRIMARY') {
             if (!method_exists($class, $staticMethod)) {
-                throw new \Exception('Method "'.$staticMethod.'" does not exist in "'.$class.'"');
+                throw new Exception('Method "'.$staticMethod.'" does not exist in "'.$class.'"');
             }
             if (!isset($this->objects[$class][$primaryId]) || $forceNew) {
                 if (count($args) > 0) {
@@ -221,7 +223,7 @@ class ObjectManager
     /**
      * @param string $class
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     private function getClassType(string $class): string
     {
@@ -232,7 +234,7 @@ class ObjectManager
         //If the first character is a backslash, assume this is a fully defined namespace
         if (substr($class, 0, 1) == '\\') {
             if (!class_exists($class)) {
-                throw new \Exception('Class Does Not Exist');
+                throw new Exception('Class Does Not Exist');
             }
         } else {
             //Cycle up through namespaces to find this class.
@@ -262,7 +264,7 @@ class ObjectManager
         }
 
         if (!class_exists($class)) {
-            throw new \Exception('Class Does Not Exist (2)');
+            throw new Exception('Class Does Not Exist (2)');
         }
 
         $this->object_types[$class] = $set;
@@ -351,9 +353,9 @@ class ObjectManager
      * @param array|null $defaults
      * @param bool       $forceNew
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getModel(string $modelName, $primary_id = null, array $defaults = null, bool $forceNew = false)
+    public function getModel(string $modelName, $primary_id = null, ?array $defaults = null, bool $forceNew = false)
     {
         foreach ($this->namespaces as $namespace) {
             if (substr($namespace, -1) !== '\\') {
@@ -365,7 +367,7 @@ class ObjectManager
                 return $this->getObject($className, $primary_id, $defaults, $forceNew);
             }
         }
-        throw new \Exception('Model Not Found: '.$modelName.' within namespace(s) '.print_r($this->namespaces, true));
+        throw new Exception('Model Not Found: '.$modelName.' within namespace(s) '.print_r($this->namespaces, true));
     }
 
     /**
@@ -375,7 +377,7 @@ class ObjectManager
      * @param int    $primaryId
      * @param mixed  ...$args
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function getFactoryModelObject(
         string $modelName,
@@ -393,7 +395,7 @@ class ObjectManager
                 return $this->getFactoryObject($className, $staticMethod, $forceNew, ...$args);
             }
         }
-        throw new \Exception('Factory Model Not Found: '.$modelName.' within namespace(s) '.print_r($this->namespaces,
+        throw new Exception('Factory Model Not Found: '.$modelName.' within namespace(s) '.print_r($this->namespaces,
                 true));
     }
 
