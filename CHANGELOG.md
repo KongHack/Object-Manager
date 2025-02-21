@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.8.5](https://github.com/KongHack/Object-Manager/releases/tag/2.8.5)
+- @GameCharmer Update for PHP 8.4
+
+
+
 ## [2.8.4](https://github.com/KongHack/Object-Manager/releases/tag/2.8.4)
 - @GameCharmer Update Composer Dependencies
 
