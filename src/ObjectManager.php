@@ -101,7 +101,7 @@ class ObjectManager
     /**
      * @return array
      */
-    public function debugGetEverything()
+    public function debugGetEverything(): array
     {
         return [
             'objects'      => $this->objects,
@@ -118,7 +118,7 @@ class ObjectManager
      * @return mixed
      * @throws Exception
      */
-    public function getObject(string $class, mixed $primaryId = null, array $rawArray = null, bool $forceNew = false)
+    public function getObject(string $class, mixed $primaryId = null, ?array $rawArray = null, bool $forceNew = false)
     {
         // Handle 0's equating to null
         $primaryId = ($primaryId === 0 ? null : $primaryId);

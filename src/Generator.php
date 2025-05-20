@@ -256,7 +256,7 @@ class Generator
      * @param string $string
      * @return void
      */
-    protected function fileWrite($key, string $string): void
+    protected function fileWrite(mixed $key, string $string): void
     {
         fwrite($this->open_files[$key], str_repeat(' ', $this->open_files_level[$key] * 4).$string);
     }
@@ -265,7 +265,7 @@ class Generator
      * @param mixed $key
      * @return void
      */
-    protected function fileBump($key): void
+    protected function fileBump(mixed $key): void
     {
         ++$this->open_files_level[$key];
     }
@@ -274,7 +274,7 @@ class Generator
      * @param mixed $key
      * @return void
      */
-    protected function fileDrop($key): void
+    protected function fileDrop(mixed $key): void
     {
         --$this->open_files_level[$key];
     }
@@ -283,7 +283,7 @@ class Generator
      * @param mixed $key
      * @return void
      */
-    protected function fileClose($key): void
+    protected function fileClose(mixed $key): void
     {
         fclose($this->open_files[$key]);
         unset($this->open_files[$key]);
@@ -310,10 +310,10 @@ class Generator
                     $className = '';
                     $fh        = fopen($file, 'r');
                     while (($buffer = fgets($fh)) !== false) {
-                        if (substr($buffer, 0, 9) == 'namespace') {
+                        if (str_starts_with($buffer, 'namespace')) {
                             $namespace = substr(trim($buffer), 10, -1);
                         }
-                        if (substr($buffer, 0, 5) == 'class') {
+                        if (str_starts_with($buffer, 'class')) {
                             $temp      = explode(' ', $buffer);
                             $className = trim($temp[1]);
                             break;
