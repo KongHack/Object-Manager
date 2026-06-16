@@ -4,3 +4,5 @@ vendor/*
 src/Generated/*
 config/*
 !config/config.example.yml
+.codex
+codex-notes.md

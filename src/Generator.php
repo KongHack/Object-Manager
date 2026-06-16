@@ -175,14 +175,16 @@ class Generator
                     break;
 
                 case 'getFactoryObject':
+                case 'getFactoryModelObject':
                     // Check to see if we have a primary in the args.
                     $primary_name = null;
-                    $primary_arg  = false;
                     if(defined($cName.'::CLASS_PRIMARY')) {
                         $primary_name = constant($cName.'::CLASS_PRIMARY');
                     }
 
                     foreach ($definition['factory'] as $method => $methodArgs) {
+                        $primary_arg      = false;
+                        $primary_variable = '$primary_id';
                         $this->fileWrite($fh, PHP_EOL);
                         $this->fileWrite($fh, '/**'.PHP_EOL);
                         $maxLeft   = 8;
@@ -192,17 +194,18 @@ class Generator
                             $maxLeft     = max($maxLeft, strlen($tmp[0]));
                             $variables[] = $tmp[1];
                             if($primary_name != null && $tmp[1] == '$'.$primary_name) {
-                                $primary_arg = true;
+                                $primary_arg      = true;
+                                $primary_variable = $tmp[1];
                             }
-                        }
-                        if(!$primary_arg) {
-                            $this->fileWrite($fh,
-                                ' * @param '.str_pad('mixed|null', $maxLeft, ' ', STR_PAD_RIGHT).' $primary_id'.PHP_EOL);
                         }
                         foreach ($methodArgs as $methodArg) {
                             $tmp    = explode(' ', $methodArg);
                             $tmp[0] = str_pad($tmp[0], $maxLeft, ' ', STR_PAD_RIGHT);
                             $this->fileWrite($fh, ' * @param '.implode(' ', $tmp).PHP_EOL);
+                        }
+                        if(!$primary_arg) {
+                            $this->fileWrite($fh,
+                                ' * @param '.str_pad('mixed|null', $maxLeft, ' ', STR_PAD_RIGHT).' $primary_id'.PHP_EOL);
                         }
                         $this->fileWrite($fh, ' *'.PHP_EOL);
                         $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
@@ -211,18 +214,29 @@ class Generator
                         $tmp = explode('\\',$cName);
                         $translatedMethod = array_pop($tmp).str_replace('factory','By',$method);
 
-                        $this->fileWrite($fh, 'public function get'.$translatedMethod.'('.implode(', ',$methodArgs).')'.PHP_EOL);
+                        $signatureArgs = $methodArgs;
+                        if(!$primary_arg) {
+                            $signatureArgs[] = 'mixed $primary_id = null';
+                        }
+
+                        $this->fileWrite($fh,
+                            'public function get'.$translatedMethod.'('.implode(', ', $signatureArgs).')'.PHP_EOL);
                         $this->fileWrite($fh, '{'.PHP_EOL);
                         $this->fileBump($fh);
                         if (array_key_exists('gc', $definition) && $definition['gc'] > 0) {
                             $this->fileWrite($fh,
                                 '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
                         }
-                        if($primary_arg && count($variables) == 1) {
-                            $variables = array_values($variables);
-                            $variables[] = $variables[0];
-                        }
-                        $this->fileWrite($fh, 'return $this->getFactoryObject(\''.$cName.'\', \''.$method.'\', false, '.implode(', ', $variables).');'.PHP_EOL);
+                        $callTarget = $definition['method'];
+                        $callArgs   = [
+                            '\''.$cName.'\'',
+                            '\''.$method.'\'',
+                            'false',
+                            $primary_variable,
+                        ];
+                        $callArgs   = array_merge($callArgs, $variables);
+                        $this->fileWrite($fh,
+                            'return $this->'.$callTarget.'('.implode(', ', $callArgs).');'.PHP_EOL);
                         $this->fileDrop($fh);
                         $this->fileWrite($fh, '}'.PHP_EOL);
                         $this->fileWrite($fh, PHP_EOL);
