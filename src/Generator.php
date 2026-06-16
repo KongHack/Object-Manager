@@ -1,9 +1,17 @@
 <?php
 namespace GCWorld\ObjectManager;
 
+use GCWorld\ObjectManager\Attributes\ObjectFactory;
+use GCWorld\ObjectManager\Attributes\ObjectManager as ObjectManagerAttribute;
 use GCWorld\Utilities\Traits\General;
-use phpDocumentor\Reflection\DocBlock;
-use phpDocumentor\Reflection\DocBlockFactory;
+use ReflectionAttribute;
+use ReflectionClass;
+use ReflectionIntersectionType;
+use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionParameter;
+use ReflectionType;
+use ReflectionUnionType;
 
 /**
  * Class Generator
@@ -64,7 +72,7 @@ class Generator
     /**
      * @return bool
      */
-    public function generate()
+    public function generate(): bool
     {
         if($this->debug) {
             echo PHP_EOL;
@@ -310,46 +318,27 @@ class Generator
      */
     private function generateAnnotatedConfig(): array
     {
-        $cPhpDocFactory  = DocBlockFactory::createInstance();
-
         $return = [];
         if (count($this->paths) > 0) {
             foreach ($this->paths as $path) {
                 $classFiles = self::glob_recursive(rtrim($path, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'*.php');
                 foreach ($classFiles as $file) {
-                    if($this->debug) {
-                        echo ' - Analyzing Class File: ',$file,PHP_EOL;
-                    }
-                    $namespace = '';
-                    $className = '';
-                    $fh        = fopen($file, 'r');
-                    while (($buffer = fgets($fh)) !== false) {
-                        if (str_starts_with($buffer, 'namespace')) {
-                            $namespace = substr(trim($buffer), 10, -1);
+                    foreach ($this->discoverClassesInFile($file) as $classString) {
+                        if($this->debug) {
+                            echo ' - Analyzing Class File: ',$file,PHP_EOL;
+                            echo ' - - Found FQCN: ',$classString,PHP_EOL;
                         }
-                        if (str_starts_with($buffer, 'class')) {
-                            $temp      = explode(' ', $buffer);
-                            $className = trim($temp[1]);
-                            break;
-                        }
-                    }
-                    $classString = trim('\\'.$namespace.'\\'.$className);
-                    if($this->debug) {
-                        echo ' - - Found FQCN: ',$classString,PHP_EOL;
-                    }
-                    if (class_exists($classString)) {
-                        $thisClass = new \ReflectionClass($classString);
-                        if (($comment = $thisClass->getDocComment()) !== false) {
-                            $phpDoc = $cPhpDocFactory->create($comment);
-                            $config = $this->processTags($classString, $phpDoc);
+                        if (class_exists($classString)) {
+                            $thisClass = new ReflectionClass($classString);
+                            $config    = $this->extractAttributeConfig($thisClass);
                             if ($config) {
-                                $return[$className] = $config;
+                                $return[$thisClass->getShortName()] = $config;
                             } elseif($this->debug) {
                                 echo ' - [!!] No Config Found', PHP_EOL;
                             }
+                        } elseif($this->debug) {
+                            echo ' - [!!] CLASS NOT FOUND',PHP_EOL;
                         }
-                    } elseif($this->debug) {
-                        echo ' - [!!] CLASS NOT FOUND',PHP_EOL;
                     }
                 }
             }
@@ -358,59 +347,213 @@ class Generator
         return $return;
     }
 
-    /**
-     * @param string   $classString
-     * @param DocBlock $phpDoc
-     * @return array|bool
-     */
-    private function processTags(string $classString, DocBlock $phpDoc)
+    private function extractAttributeConfig(ReflectionClass $class): array|bool
     {
-        if (!$phpDoc->hasTag('om-method')) {
+        $attributes = $class->getAttributes(ObjectManagerAttribute::class, ReflectionAttribute::IS_INSTANCEOF);
+        if (count($attributes) < 1) {
             return false;
         }
 
-        $tmp = explode('\\',trim($classString));
+        /** @var ObjectManagerAttribute $objectManager */
+        $objectManager = $attributes[0]->newInstance();
+        $namespace     = $objectManager->namespace;
+        if ($namespace === null) {
+            $namespace = '\\'.trim($class->getNamespaceName(), '\\');
+        }
 
         $config = [
-            'method'    => (string) $phpDoc->getTagsByName('om-method')[0],
-            'name'      => array_pop($tmp),
-            'namespace' => implode('\\',$tmp),
-            'gc'        => 0,
+            'method'    => $objectManager->method,
+            'name'      => $objectManager->name ?? $class->getShortName(),
+            'namespace' => $namespace,
+            'gc'        => $objectManager->gc,
         ];
-        unset($tmp);
-
-        if($phpDoc->hasTag('om-name')) {
-            $config['name'] = trim((string) $phpDoc->getTagsByName('om-name')[0]);
-        }
-        if($phpDoc->hasTag('om-namespace')) {
-            $config['namespace'] = trim((string) $phpDoc->getTagsByName('om-namespace')[0]);
-        }
-        if($phpDoc->hasTag('om-gc')) {
-            $config['gc'] = abs(intval(trim((string) $phpDoc->getTagsByName('om-gc')[0])));
-        }
 
         $factory = [];
-        if(in_array($config['method'],['getFactoryObject','getFactoryModelObject'])) {
-            // Handle factory stuff
-            $i = 0;
-            while($i < 1000) {
-                ++$i;
-                $method = $phpDoc->getTagsByName('om-factory-'.$i.'-method');
-                if(!$method) {
-                    break;
-                }
-                $methodName = (string) $method[0];
-                $methodArgs = [];
-                $args       = $phpDoc->getTagsByName('om-factory-'.$i.'-arg');
-                foreach($args as $arg) {
-                    $methodArgs[] = (string) $arg;
-                }
-
-                $factory[$methodName] = $methodArgs;
-            }
+        if(in_array($config['method'], ['getFactoryObject', 'getFactoryModelObject'], true)) {
+            $factory = $this->extractFactoryMethods($class);
         }
         $config['factory'] = $factory;
 
         return $config;
+    }
+
+    private function extractFactoryMethods(ReflectionClass $class): array
+    {
+        $factory = [];
+        foreach ($class->getMethods() as $method) {
+            if ($method->getDeclaringClass()->getName() !== $class->getName()) {
+                continue;
+            }
+
+            $attributes = $method->getAttributes(ObjectFactory::class, ReflectionAttribute::IS_INSTANCEOF);
+            if (count($attributes) < 1) {
+                continue;
+            }
+
+            if (!$method->isPublic() || !$method->isStatic()) {
+                throw new \Exception(
+                    'ObjectFactory attribute must be declared on a public static method: '.
+                    $class->getName().'::'.$method->getName()
+                );
+            }
+
+            $factory[$method->getName()] = $this->reflectFactoryArgs($method);
+        }
+
+        return $factory;
+    }
+
+    private function reflectFactoryArgs(ReflectionMethod $method): array
+    {
+        $args = [];
+        foreach ($method->getParameters() as $parameter) {
+            $args[] = $this->formatParameterDefinition($parameter);
+        }
+
+        return $args;
+    }
+
+    private function formatParameterDefinition(ReflectionParameter $parameter): string
+    {
+        $type = $this->formatType($parameter->getType());
+        $name = '$'.$parameter->getName();
+
+        if ($parameter->isPassedByReference()) {
+            $name = '&'.$name;
+        }
+        if ($parameter->isVariadic()) {
+            $name = '...'.$name;
+        }
+
+        return $type.' '.$name;
+    }
+
+    private function formatType(?ReflectionType $type): string
+    {
+        if ($type === null) {
+            return 'mixed';
+        }
+
+        if ($type instanceof ReflectionNamedType) {
+            return $this->formatNamedType($type);
+        }
+
+        if ($type instanceof ReflectionUnionType) {
+            $parts = [];
+            foreach ($type->getTypes() as $namedType) {
+                $parts[] = $this->formatNamedType($namedType);
+            }
+
+            return implode('|', $parts);
+        }
+
+        if ($type instanceof ReflectionIntersectionType) {
+            $parts = [];
+            foreach ($type->getTypes() as $namedType) {
+                $parts[] = $this->formatNamedType($namedType);
+            }
+
+            return implode('&', $parts);
+        }
+
+        return 'mixed';
+    }
+
+    private function formatNamedType(ReflectionNamedType $type): string
+    {
+        $name = $type->getName();
+        if (!$type->isBuiltin() && $name !== 'self' && $name !== 'parent' && $name !== 'static') {
+            $name = '\\'.ltrim($name, '\\');
+        }
+
+        if ($type->allowsNull() && $name !== 'mixed' && !str_contains($name, 'null')) {
+            return '?'.$name;
+        }
+
+        return $name;
+    }
+
+    private function discoverClassesInFile(string $file): array
+    {
+        $contents = file_get_contents($file);
+        if ($contents === false) {
+            return [];
+        }
+
+        $tokens               = token_get_all($contents);
+        $classes              = [];
+        $namespace            = '';
+        $previousSignificant  = null;
+        $tokenCount           = count($tokens);
+
+        for ($i = 0; $i < $tokenCount; ++$i) {
+            $token = $tokens[$i];
+            if (is_string($token)) {
+                if (trim($token) !== '') {
+                    $previousSignificant = $token;
+                }
+                continue;
+            }
+
+            [$tokenId] = $token;
+            if ($tokenId === T_NAMESPACE) {
+                $namespace = $this->readNamespaceTokens($tokens, $i + 1);
+                $previousSignificant = T_NAMESPACE;
+                continue;
+            }
+
+            if ($tokenId === T_CLASS) {
+                if ($previousSignificant === T_NEW) {
+                    continue;
+                }
+
+                $className = $this->readNextIdentifier($tokens, $i + 1);
+                if ($className !== null) {
+                    $classes[] = '\\'.trim($namespace.'\\'.$className, '\\');
+                }
+                $previousSignificant = T_CLASS;
+                continue;
+            }
+
+            if (!in_array($tokenId, [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
+                $previousSignificant = $tokenId;
+            }
+        }
+
+        return $classes;
+    }
+
+    private function readNamespaceTokens(array $tokens, int $start): string
+    {
+        $namespace  = '';
+        $tokenCount = count($tokens);
+        for ($i = $start; $i < $tokenCount; ++$i) {
+            $token = $tokens[$i];
+            if (is_string($token)) {
+                if ($token === ';' || $token === '{') {
+                    break;
+                }
+                continue;
+            }
+
+            if (in_array($token[0], [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED, T_NS_SEPARATOR], true)) {
+                $namespace .= $token[1];
+            }
+        }
+
+        return trim($namespace, '\\');
+    }
+
+    private function readNextIdentifier(array $tokens, int $start): ?string
+    {
+        $tokenCount = count($tokens);
+        for ($i = $start; $i < $tokenCount; ++$i) {
+            $token = $tokens[$i];
+            if (is_array($token) && $token[0] === T_STRING) {
+                return $token[1];
+            }
+        }
+
+        return null;
     }
 }

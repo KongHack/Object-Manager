@@ -7,14 +7,55 @@ A simple object manager that maintains objects in memory
 
 
 
-### Annotated ObjectManager Keys
+### ObjectManager Attributes
 
-|                          |                  |                                                                                         |
-|--------------------------|------------------|-----------------------------------------------------------------------------------------|
-| ``@om-method``           | [***required***] | Options getObject, getModel, getFactoryObject                                           |
-| ``@om-namespace``        | [optional]       | Namespace path to use when generating recursively, in the event your namespace is funky |
-| ``@om-name``             | [optional]       | Override for the getter. Will start as getYourNameHere                                  |
-| ``@om-gc``               | [optional]       | Integer value for automated garbage collection. 0 will not run garbage collection       |
-| ``@om-factory-X-method`` | [optional]       | Where X is an integer.  Use with factory-X-arg to setup your static function calls      |
-| ``@om-factory-X-arg``    | [optional]       | Where X is an integer.  Use the format of TYPE NAME (ie: string $super_id)              |   
+Use PHP attributes instead of docblocks to mark classes for manager generation.
 
+#### Class Attribute
+
+```php
+use GCWorld\ObjectManager\Attributes\ObjectManager;
+
+#[ObjectManager(method: 'getObject', gc: 100)]
+class User
+{
+}
+```
+
+Available `ObjectManager` arguments:
+
+| Argument     | Required | Notes                                                                 |
+|--------------|----------|-----------------------------------------------------------------------|
+| `method`     | yes      | `getObject`, `getModel`, `getFactoryObject`, `getFactoryModelObject`, `getMultiObject` |
+| `name`       | no       | Getter suffix override. Defaults to the class short name.             |
+| `namespace`  | no       | Namespace override used in generated manager methods.                 |
+| `gc`         | no       | Automated garbage-collection limit. `0` disables it.                 |
+
+#### Factory Methods
+
+Factory-backed classes use a class attribute plus one or more attributed public static methods.
+
+```php
+use GCWorld\ObjectManager\Attributes\ObjectFactory;
+use GCWorld\ObjectManager\Attributes\ObjectManager;
+
+#[ObjectManager(method: 'getFactoryObject')]
+class User
+{
+    public const CLASS_PRIMARY = 'uuid';
+
+    #[ObjectFactory]
+    public static function factoryByUuid(string $uuid): self
+    {
+        // ...
+    }
+
+    #[ObjectFactory]
+    public static function factoryLookup(string $email, string $name): self
+    {
+        // ...
+    }
+}
+```
+
+The generator reflects the attributed static method parameters directly. There is no separate attribute syntax for ordered factory args.

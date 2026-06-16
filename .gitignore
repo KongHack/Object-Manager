@@ -6,3 +6,4 @@ config/*
 !config/config.example.yml
 .codex
 codex-notes.md
+.phpunit.cache/

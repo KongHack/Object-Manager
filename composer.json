@@ -11,16 +11,22 @@
     "php": ">=8.4",
     "composer/composer": ">=2.7",
     "gcworld/utilities": ">=2.0",
-    "phpdocumentor/reflection-docblock": "^5.2",
     "symfony/yaml": "^6.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.5"
   },
   "autoload": {
     "psr-4": {"GCWorld\\ObjectManager\\": "src/"}
   },
+  "autoload-dev": {
+    "psr-4": {"GCWorld\\ObjectManager\\Tests\\": "tests/"}
+  },
   "scripts": {
     "post-autoload-dump": [
       "GCWorld\\ObjectManager\\ComposerInstaller::setupConfig"
-    ]
+    ],
+    "test": "phpunit"
   },
   "license":"MIT"
 }
