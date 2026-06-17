@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.9.1](https://github.com/KongHack/Object-Manager/releases/tag/2.9.1)
+- @GameCharmer Update migrate-docblocks to run via composer's bin system
+
+
+
 ## [2.9.0](https://github.com/KongHack/Object-Manager/releases/tag/2.9.0)
 - @GameCharmer BREAKING CHANGE: Replace docblocks with attributes!
 

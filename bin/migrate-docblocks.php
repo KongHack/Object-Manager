@@ -1,7 +1,28 @@
 #!/usr/bin/env php
 <?php
 
-require dirname(__DIR__).'/vendor/autoload.php';
+$autoloadPaths = [];
+
+if (isset($_composer_autoload_path) && is_string($_composer_autoload_path)) {
+    $autoloadPaths[] = $_composer_autoload_path;
+}
+
+$autoloadPaths[] = dirname(__DIR__).'/vendor/autoload.php';
+$autoloadPaths[] = dirname(__DIR__, 3).'/autoload.php';
+
+$autoloadLoaded = false;
+foreach ($autoloadPaths as $autoloadPath) {
+    if (is_file($autoloadPath)) {
+        require $autoloadPath;
+        $autoloadLoaded = true;
+        break;
+    }
+}
+
+if (!$autoloadLoaded) {
+    fwrite(STDERR, "Unable to locate Composer autoload.php.\n");
+    exit(1);
+}
 
 use GCWorld\ObjectManager\DocblockMigrator;
 
@@ -20,7 +41,7 @@ foreach ($arguments as $argument) {
 }
 
 if ($paths === []) {
-    fwrite(STDERR, "Usage: php bin/migrate-docblocks.php [--dry-run] <path> [<path> ...]\n");
+    fwrite(STDERR, "Usage: migrate-docblocks.php [--dry-run] <path> [<path> ...]\n");
     exit(1);
 }
 

@@ -22,6 +22,9 @@
   "autoload-dev": {
     "psr-4": {"GCWorld\\ObjectManager\\Tests\\": "tests/"}
   },
+  "bin": [
+    "bin/migrate-docblocks.php"
+  ],
   "scripts": {
     "post-autoload-dump": [
       "GCWorld\\ObjectManager\\ComposerInstaller::setupConfig"
