@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.9.0](https://github.com/KongHack/Object-Manager/releases/tag/2.9.0)
+- @GameCharmer BREAKING CHANGE: Replace docblocks with attributes!
+
+
+
 ## [2.8.7](https://github.com/KongHack/Object-Manager/releases/tag/2.8.7)
 - @GameCharmer Update Composer Dependencies
 
