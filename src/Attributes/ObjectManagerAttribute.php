@@ -5,7 +5,7 @@ use Attribute;
 use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-class ObjectManager
+class ObjectManagerAttribute
 {
     public readonly ObjectManagerMethod $method;
     public readonly ?string $name;

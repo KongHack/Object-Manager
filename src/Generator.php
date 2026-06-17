@@ -1,8 +1,8 @@
 <?php
 namespace GCWorld\ObjectManager;
 
-use GCWorld\ObjectManager\Attributes\ObjectFactory;
-use GCWorld\ObjectManager\Attributes\ObjectManager as ObjectManagerAttribute;
+use GCWorld\ObjectManager\Attributes\ObjectFactoryAttribute;
+use GCWorld\ObjectManager\Attributes\ObjectManagerAttribute;
 use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
 use GCWorld\Utilities\Traits\General;
 use ReflectionAttribute;
@@ -390,14 +390,14 @@ class Generator
                 continue;
             }
 
-            $attributes = $method->getAttributes(ObjectFactory::class, ReflectionAttribute::IS_INSTANCEOF);
+            $attributes = $method->getAttributes(ObjectFactoryAttribute::class, ReflectionAttribute::IS_INSTANCEOF);
             if (count($attributes) < 1) {
                 continue;
             }
 
             if (!$method->isPublic() || !$method->isStatic()) {
                 throw new \Exception(
-                    'ObjectFactory attribute must be declared on a public static method: '.
+                    'ObjectFactoryAttribute must be declared on a public static method: '.
                     $class->getName().'::'.$method->getName()
                 );
             }

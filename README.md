@@ -3,7 +3,7 @@
 A simple object manager that maintains objects in memory
 
 #### Version
-2.9.1
+2.9.2
 
 ### ObjectManager Attributes
 
@@ -12,16 +12,16 @@ Use PHP attributes instead of docblocks to mark classes for manager generation.
 #### Class Attribute
 
 ```php
-use GCWorld\ObjectManager\Attributes\ObjectManager;
+use GCWorld\ObjectManager\Attributes\ObjectManagerAttribute;
 use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
 
-#[ObjectManager(method: ObjectManagerMethod::GetObject, gc: 100)]
+#[ObjectManagerAttribute(method: ObjectManagerMethod::GetObject, gc: 100)]
 class User
 {
 }
 ```
 
-Available `ObjectManager` arguments:
+Available `ObjectManagerAttribute` arguments:
 
 | Argument     | Required | Notes                                                                 |
 |--------------|----------|-----------------------------------------------------------------------|
@@ -37,22 +37,22 @@ These enum cases map to the generated manager behaviors `getObject`, `getModel`,
 Factory-backed classes use a class attribute plus one or more attributed public static methods.
 
 ```php
-use GCWorld\ObjectManager\Attributes\ObjectFactory;
-use GCWorld\ObjectManager\Attributes\ObjectManager;
+use GCWorld\ObjectManager\Attributes\ObjectFactoryAttribute;
+use GCWorld\ObjectManager\Attributes\ObjectManagerAttribute;
 use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
 
-#[ObjectManager(method: ObjectManagerMethod::GetFactoryObject)]
+#[ObjectManagerAttribute(method: ObjectManagerMethod::GetFactoryObject)]
 class User
 {
     public const CLASS_PRIMARY = 'uuid';
 
-    #[ObjectFactory]
+    #[ObjectFactoryAttribute]
     public static function factoryByUuid(string $uuid): self
     {
         // ...
     }
 
-    #[ObjectFactory]
+    #[ObjectFactoryAttribute]
     public static function factoryLookup(string $email, string $name): self
     {
         // ...
@@ -89,7 +89,7 @@ Current coverage is focused on:
 - basic attributed object getter generation
 - factory wrapper generation from attributed static methods
 - `getFactoryModelObject` wrapper generation
-- invalid `#[ObjectFactory]` usage on non-public or non-static methods
+- invalid `#[ObjectFactoryAttribute]` usage on non-public or non-static methods
 
 The tests generate a temporary manager file under `src/Generated/` during execution and clean it up afterward.
 
@@ -111,9 +111,9 @@ composer migrate-docblocks -- path/to/src
 
 What the migrator does:
 
-- converts class-level `@om-method`, `@om-name`, `@om-namespace`, and `@om-gc` tags into `#[ObjectManager(...)]` using `ObjectManagerMethod`
-- converts each `@om-factory-X-method` entry into `#[ObjectFactory]` on the matching class method
+- converts class-level `@om-method`, `@om-name`, `@om-namespace`, and `@om-gc` tags into `#[ObjectManagerAttribute(...)]` using `ObjectManagerMethod`
+- converts each `@om-factory-X-method` entry into `#[ObjectFactoryAttribute]` on the matching class method
 - removes legacy `@om-*` lines from the class docblock while preserving unrelated docblock text
-- adds the required `use GCWorld\ObjectManager\Attributes\ObjectManager;`, `use GCWorld\ObjectManager\Attributes\ObjectFactory;`, and `use GCWorld\ObjectManager\Enums\ObjectManagerMethod;` imports
+- adds the required `use GCWorld\ObjectManager\Attributes\ObjectManagerAttribute;`, `use GCWorld\ObjectManager\Attributes\ObjectFactoryAttribute;`, and `use GCWorld\ObjectManager\Enums\ObjectManagerMethod;` imports
 
 The script only migrates factory metadata when every referenced legacy factory method can be resolved in the class. If a declared factory method is missing, the file is skipped and a warning is reported so existing metadata is not destroyed.

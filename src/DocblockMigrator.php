@@ -96,7 +96,7 @@ class DocblockMigrator
 
             if ($class['hasObjectManagerAttribute']) {
                 $warnings[] = $this->buildPrefix($path, $class['name']).
-                    'already has an ObjectManager attribute; skipped.';
+                    'already has an ObjectManagerAttribute; skipped.';
                 continue;
             }
 
@@ -133,7 +133,7 @@ class DocblockMigrator
                 $edits[] = [
                     'start'       => $method['start'],
                     'end'         => $method['start'],
-                    'replacement' => $method['indent']."#[ObjectFactory]\n",
+                'replacement' => $method['indent']."#[ObjectFactoryAttribute]\n",
                 ];
                 $needsObjectFactoryImport = true;
             }
@@ -150,7 +150,7 @@ class DocblockMigrator
         if ($needsObjectManagerImport) {
             $importEdit = $this->buildUseImportEdit(
                 $contents,
-                'use GCWorld\\ObjectManager\\Attributes\\ObjectManager;'
+                'use GCWorld\\ObjectManager\\Attributes\\ObjectManagerAttribute;'
             );
             if ($importEdit !== null) {
                 $edits[] = $importEdit;
@@ -170,7 +170,7 @@ class DocblockMigrator
         if ($needsObjectFactoryImport) {
             $importEdit = $this->buildUseImportEdit(
                 $contents,
-                'use GCWorld\\ObjectManager\\Attributes\\ObjectFactory;'
+                'use GCWorld\\ObjectManager\\Attributes\\ObjectFactoryAttribute;'
             );
             if ($importEdit !== null) {
                 $edits[] = $importEdit;
@@ -270,7 +270,10 @@ class DocblockMigrator
             $classes[] = [
                 'name'                     => $className,
                 'hasObjectManagerAttribute' => str_contains($prefix, '#[')
-                    && (str_contains($prefix, 'ObjectManager') || str_contains($prefix, 'Attributes\\ObjectManager')),
+                    && (
+                        str_contains($prefix, 'ObjectManagerAttribute')
+                        || str_contains($prefix, 'Attributes\\ObjectManagerAttribute')
+                    ),
                 'classTokenStart'          => $offsets[$index],
                 'docblock'                 => $docblock,
                 'methods'                  => $this->discoverMethods($tokens, $offsets, $classStart, $classEnd, $contents),
@@ -346,7 +349,10 @@ class DocblockMigrator
                 'start'                    => $lineStart,
                 'indent'                   => $indent,
                 'hasObjectFactoryAttribute' => str_contains($prefix, '#[')
-                    && (str_contains($prefix, 'ObjectFactory') || str_contains($prefix, 'Attributes\\ObjectFactory')),
+                    && (
+                        str_contains($prefix, 'ObjectFactoryAttribute')
+                        || str_contains($prefix, 'Attributes\\ObjectFactoryAttribute')
+                    ),
             ];
         }
 
@@ -514,7 +520,7 @@ class DocblockMigrator
             $arguments[] = 'gc: '.$metadata['gc'];
         }
 
-        return '#[ObjectManager('.implode(', ', $arguments).')]';
+        return '#[ObjectManagerAttribute('.implode(', ', $arguments).')]';
     }
 
     private function renderMethodEnumReference(string $method): string

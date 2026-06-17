@@ -1,14 +1,14 @@
 <?php
 namespace GCWorld\ObjectManager\Tests\Fixtures\AttributeModels;
 
-use GCWorld\ObjectManager\Attributes\ObjectFactory;
-use GCWorld\ObjectManager\Attributes\ObjectManager;
+use GCWorld\ObjectManager\Attributes\ObjectFactoryAttribute;
+use GCWorld\ObjectManager\Attributes\ObjectManagerAttribute;
 use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
 
-#[ObjectManager(method: ObjectManagerMethod::GetFactoryModelObject)]
+#[ObjectManagerAttribute(method: ObjectManagerMethod::GetFactoryModelObject)]
 class FactoryModelObject
 {
-    #[ObjectFactory]
+    #[ObjectFactoryAttribute]
     public static function factoryLookup(string $email): self
     {
         return new self();

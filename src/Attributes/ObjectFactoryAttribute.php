@@ -4,6 +4,6 @@ namespace GCWorld\ObjectManager\Attributes;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD)]
-class ObjectFactory
+class ObjectFactoryAttribute
 {
 }

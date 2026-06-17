@@ -46,7 +46,7 @@ PHP;
         self::assertTrue($result['changed']);
         self::assertSame([], $result['warnings']);
         self::assertStringContainsString(
-            "use GCWorld\\ObjectManager\\Attributes\\ObjectManager;\n",
+            "use GCWorld\\ObjectManager\\Attributes\\ObjectManagerAttribute;\n",
             $result['contents']
         );
         self::assertStringContainsString(
@@ -54,16 +54,16 @@ PHP;
             $result['contents']
         );
         self::assertStringContainsString(
-            "use GCWorld\\ObjectManager\\Attributes\\ObjectFactory;\n",
+            "use GCWorld\\ObjectManager\\Attributes\\ObjectFactoryAttribute;\n",
             $result['contents']
         );
         self::assertStringContainsString(
-            "#[ObjectManager(method: ObjectManagerMethod::GetFactoryObject, name: 'Account', namespace: '\\\\Legacy\\\\Model', gc: 12)]\nclass User",
+            "#[ObjectManagerAttribute(method: ObjectManagerMethod::GetFactoryObject, name: 'Account', namespace: '\\\\Legacy\\\\Model', gc: 12)]\nclass User",
             $result['contents']
         );
         self::assertStringContainsString("/**\n * User model.\n */", $result['contents']);
-        self::assertStringContainsString("#[ObjectFactory]\n    public static function factoryByUuid", $result['contents']);
-        self::assertStringContainsString("#[ObjectFactory]\n    public static function factoryLookup", $result['contents']);
+        self::assertStringContainsString("#[ObjectFactoryAttribute]\n    public static function factoryByUuid", $result['contents']);
+        self::assertStringContainsString("#[ObjectFactoryAttribute]\n    public static function factoryLookup", $result['contents']);
         self::assertStringNotContainsString('@om-method', $result['contents']);
     }
 

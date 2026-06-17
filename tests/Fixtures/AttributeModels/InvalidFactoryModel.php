@@ -1,14 +1,14 @@
 <?php
 namespace GCWorld\ObjectManager\Tests\Fixtures\AttributeModels;
 
-use GCWorld\ObjectManager\Attributes\ObjectFactory;
-use GCWorld\ObjectManager\Attributes\ObjectManager;
+use GCWorld\ObjectManager\Attributes\ObjectFactoryAttribute;
+use GCWorld\ObjectManager\Attributes\ObjectManagerAttribute;
 use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
 
-#[ObjectManager(method: ObjectManagerMethod::GetFactoryObject)]
+#[ObjectManagerAttribute(method: ObjectManagerMethod::GetFactoryObject)]
 class InvalidFactoryModel
 {
-    #[ObjectFactory]
+    #[ObjectFactoryAttribute]
     protected static function factoryHidden(string $email): self
     {
         return new self();

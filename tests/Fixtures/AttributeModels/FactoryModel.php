@@ -1,22 +1,22 @@
 <?php
 namespace GCWorld\ObjectManager\Tests\Fixtures\AttributeModels;
 
-use GCWorld\ObjectManager\Attributes\ObjectFactory;
-use GCWorld\ObjectManager\Attributes\ObjectManager;
+use GCWorld\ObjectManager\Attributes\ObjectFactoryAttribute;
+use GCWorld\ObjectManager\Attributes\ObjectManagerAttribute;
 use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
 
-#[ObjectManager(method: ObjectManagerMethod::GetFactoryObject, gc: 10)]
+#[ObjectManagerAttribute(method: ObjectManagerMethod::GetFactoryObject, gc: 10)]
 class FactoryModel
 {
     public const CLASS_PRIMARY = 'uuid';
 
-    #[ObjectFactory]
+    #[ObjectFactoryAttribute]
     public static function factoryByUuid(string $uuid): self
     {
         return new self();
     }
 
-    #[ObjectFactory]
+    #[ObjectFactoryAttribute]
     public static function factoryLookup(string $email, string $name): self
     {
         return new self();

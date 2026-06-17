@@ -132,7 +132,7 @@ class GeneratorTest extends TestCase
         $generator->addPath($fixtureDir);
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('ObjectFactory attribute must be declared on a public static method');
+        $this->expectExceptionMessage('ObjectFactoryAttribute must be declared on a public static method');
         $generator->generate();
     }
 
