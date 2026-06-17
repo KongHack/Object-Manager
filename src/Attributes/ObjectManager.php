@@ -2,30 +2,23 @@
 namespace GCWorld\ObjectManager\Attributes;
 
 use Attribute;
-use InvalidArgumentException;
+use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class ObjectManager
 {
-    private const VALID_METHODS = [
-        'getObject',
-        'getModel',
-        'getFactoryObject',
-        'getFactoryModelObject',
-        'getMultiObject',
-    ];
-
-    public readonly string $method;
+    public readonly ObjectManagerMethod $method;
     public readonly ?string $name;
     public readonly ?string $namespace;
     public readonly int $gc;
 
-    public function __construct(string $method, ?string $name = null, ?string $namespace = null, int $gc = 0)
+    public function __construct(
+        ObjectManagerMethod $method,
+        ?string $name = null,
+        ?string $namespace = null,
+        int $gc = 0
+    )
     {
-        if (!in_array($method, self::VALID_METHODS, true)) {
-            throw new InvalidArgumentException('Invalid ObjectManager method: '.$method);
-        }
-
         $this->method    = $method;
         $this->name      = $name;
         $this->namespace = $namespace;

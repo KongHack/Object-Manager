@@ -3,6 +3,7 @@ namespace GCWorld\ObjectManager;
 
 use GCWorld\ObjectManager\Attributes\ObjectFactory;
 use GCWorld\ObjectManager\Attributes\ObjectManager as ObjectManagerAttribute;
+use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
 use GCWorld\Utilities\Traits\General;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -362,14 +363,18 @@ class Generator
         }
 
         $config = [
-            'method'    => $objectManager->method,
+            'method'    => $objectManager->method->value,
             'name'      => $objectManager->name ?? $class->getShortName(),
             'namespace' => $namespace,
             'gc'        => $objectManager->gc,
         ];
 
         $factory = [];
-        if(in_array($config['method'], ['getFactoryObject', 'getFactoryModelObject'], true)) {
+        if(in_array(
+            $objectManager->method,
+            [ObjectManagerMethod::GetFactoryObject, ObjectManagerMethod::GetFactoryModelObject],
+            true
+        )) {
             $factory = $this->extractFactoryMethods($class);
         }
         $config['factory'] = $factory;

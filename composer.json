@@ -26,7 +26,8 @@
     "post-autoload-dump": [
       "GCWorld\\ObjectManager\\ComposerInstaller::setupConfig"
     ],
-    "test": "phpunit"
+    "test": "phpunit",
+    "migrate-docblocks": "php bin/migrate-docblocks.php"
   },
   "license":"MIT"
 }
