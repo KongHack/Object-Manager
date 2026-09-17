@@ -7,3 +7,4 @@ config/*
 .codex
 codex-notes.md
 .phpunit.cache/
+docker-compose.override.yml
