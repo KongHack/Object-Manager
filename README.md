@@ -1,5 +1,12 @@
 # GCWorld Object Manager
 
+![Packagist](https://img.shields.io/packagist/dm/gcworld/objectmanager.svg)
+![Packagist](https://img.shields.io/packagist/dt/gcworld/objectmanager.svg)
+
+![Packagist PHP](https://img.shields.io/packagist/php-v/gcworld/objectmanager.svg)
+![Packagist](https://img.shields.io/packagist/v/gcworld/objectmanager.svg)
+![GitHub](https://img.shields.io/github/tag/konghack/object-manager.svg)
+
 A simple object manager that maintains objects in memory
 
 #### Version
