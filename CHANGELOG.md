@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [2.9.3](https://github.com/KongHack/Object-Manager/releases/tag/2.9.3)
+- @GameCharmer Patch the generator to allow for duplicate class names under different namespaces
+
+
+
 ## [2.9.2](https://github.com/KongHack/Object-Manager/releases/tag/2.9.2)
 - @GameCharmer Eliminate name duplication
 

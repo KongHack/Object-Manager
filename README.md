@@ -10,7 +10,7 @@
 A simple object manager that maintains objects in memory
 
 #### Version
-2.9.2
+2.9.3
 
 ### ObjectManager Attributes
 
