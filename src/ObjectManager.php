@@ -357,6 +357,10 @@ class ObjectManager
      */
     public function getModel(string $modelName, $primary_id = null, ?array $defaults = null, bool $forceNew = false)
     {
+        if (str_starts_with($modelName, '\\')) {
+            return $this->getObject($modelName, $primary_id, $defaults, $forceNew);
+        }
+
         foreach ($this->namespaces as $namespace) {
             if (substr($namespace, -1) !== '\\') {
                 $namespace .= '\\';
@@ -385,6 +389,10 @@ class ObjectManager
         bool $forceNew = false,
         ...$args
     ){
+        if (str_starts_with($modelName, '\\')) {
+            return $this->getFactoryObject($modelName, $staticMethod, $forceNew, ...$args);
+        }
+
         foreach ($this->namespaces as $namespace) {
             if (substr($namespace, -1) !== '\\') {
                 $namespace .= '\\';

@@ -39,6 +39,20 @@ Available `ObjectManagerAttribute` arguments:
 
 These enum cases map to the generated manager behaviors `getObject`, `getModel`, `getFactoryObject`, and `getFactoryModelObject`.
 
+Classes in different namespaces may share a short name. The generator keeps those classes distinct by their fully qualified class names, but generated PHP methods must still have unique names. Use the attribute's `name` argument to disambiguate the getter while preserving the existing getter for the other class:
+
+```php
+#[ObjectManagerAttribute(
+    method: ObjectManagerMethod::GetObject,
+    name: 'ADRMember'
+)]
+class Member
+{
+}
+```
+
+This example generates `getADRMember()`. Generation fails with a descriptive exception if two classes would produce the same getter name.
+
 #### Factory Methods
 
 Factory-backed classes use a class attribute plus one or more attributed public static methods.

@@ -85,6 +85,7 @@ class Generator
             echo PHP_EOL;
         }
 
+        $config = $this->normalizeConfig($this->config);
         if(count($this->paths) > 0) {
             $extra = $this->generateAnnotatedConfig();
             if($this->debug) {
@@ -95,15 +96,11 @@ class Generator
             }
 
             // We are using this order so that the flat file will override
-            $this->config = array_merge($extra, $this->config);
+            $config = array_replace($extra, $config);
         }
+        $this->config = $config;
 
-        // Make sure we have trailing slashes!
-        foreach($this->config as $model => $definition) {
-            if(array_key_exists('namespace',$definition) && !str_ends_with($definition['namespace'], '\\')) {
-                $this->config[$model]['namespace'] .= '\\';
-            }
-        }
+        $this->validateGeneratedMethodNames();
 
         if($this->debug) {
             echo PHP_EOL;
@@ -131,12 +128,13 @@ class Generator
         $this->fileBump($fh);
 
 
-        foreach($this->config as $model => $definition) {
+        foreach($this->config as $definition) {
             if (!array_key_exists('method', $definition)) {
                 continue;
             }
 
-            $cName = $definition['namespace'].$model;
+            $model = $definition['model'];
+            $cName = $definition['class'];
             $fName = empty($definition['name']) ? $model : trim($definition['name']);
 
             switch ($definition['method']) {
@@ -156,7 +154,10 @@ class Generator
                         $this->fileWrite($fh,
                             '$this->garbageCollect(\''.$cName.'\', '.$definition['gc'].');'.PHP_EOL.PHP_EOL);
                     }
-                    $this->fileWrite($fh, 'return $this->getModel(\''.$model.'\', $primary_id, $defaults);'.PHP_EOL);
+                    $this->fileWrite(
+                        $fh,
+                        'return $this->getModel(\''.$definition['model_lookup'].'\', $primary_id, $defaults);'.PHP_EOL
+                    );
                     $this->fileDrop($fh);
                     $this->fileWrite($fh, '}'.PHP_EOL);
                     $this->fileWrite($fh, PHP_EOL);
@@ -221,8 +222,7 @@ class Generator
                         $this->fileWrite($fh, ' * @return '.$cName.PHP_EOL);
                         $this->fileWrite($fh, ' */'.PHP_EOL);
 
-                        $tmp = explode('\\',$cName);
-                        $translatedMethod = array_pop($tmp).str_replace('factory','By',$method);
+                        $translatedMethod = $fName.str_replace('factory','By',$method);
 
                         $signatureArgs = $methodArgs;
                         if(!$primary_arg) {
@@ -334,7 +334,7 @@ class Generator
                             $thisClass = new ReflectionClass($classString);
                             $config    = $this->extractAttributeConfig($thisClass);
                             if ($config) {
-                                $return[$thisClass->getShortName()] = $config;
+                                $return[$this->classIdentity($config['class'])] = $config;
                             } elseif($this->debug) {
                                 echo ' - [!!] No Config Found', PHP_EOL;
                             }
@@ -347,6 +347,80 @@ class Generator
         }
 
         return $return;
+    }
+
+    /**
+     * Convert legacy short-name-keyed configuration to the internal FQCN-keyed format.
+     *
+     * @param array $config
+     * @return array
+     */
+    private function normalizeConfig(array $config): array
+    {
+        $normalized = [];
+        foreach ($config as $model => $definition) {
+            $namespace = $definition['namespace'] ?? '';
+            if (!str_ends_with($namespace, '\\')) {
+                $namespace .= '\\';
+            }
+
+            $model                   = $definition['model'] ?? $model;
+            $class                   = $definition['class'] ?? $namespace.$model;
+            $definition['model']     = $model;
+            $definition['class']     = '\\'.ltrim($class, '\\');
+            $definition['namespace'] = $namespace;
+            $definition['model_lookup'] ??= $model;
+
+            $normalized[$this->classIdentity($definition['class'])] = $definition;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param string $class
+     * @return string
+     */
+    private function classIdentity(string $class): string
+    {
+        return strtolower(ltrim($class, '\\'));
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    private function validateGeneratedMethodNames(): void
+    {
+        $methods = [];
+        foreach ($this->config as $definition) {
+            if (!array_key_exists('method', $definition)) {
+                continue;
+            }
+
+            $model  = $definition['model'];
+            $prefix = empty($definition['name']) ? $model : trim($definition['name']);
+            $names  = [];
+
+            if (in_array($definition['method'], ['getModel', 'getObject'], true)) {
+                $names[] = 'get'.$prefix;
+            } elseif (in_array($definition['method'], ['getFactoryObject', 'getFactoryModelObject'], true)) {
+                foreach ($definition['factory'] as $factoryMethod => $methodArgs) {
+                    $names[] = 'get'.$prefix.str_replace('factory', 'By', $factoryMethod);
+                }
+            }
+
+            foreach ($names as $name) {
+                $identity = strtolower($name);
+                if (array_key_exists($identity, $methods)) {
+                    throw new Exception(
+                        'Generated method collision for '.$name.': '.$methods[$identity].' and '.
+                        $definition['class'].'. Set a unique ObjectManagerAttribute name to disambiguate the getters.'
+                    );
+                }
+                $methods[$identity] = $definition['class'];
+            }
+        }
     }
 
     /**
@@ -366,12 +440,17 @@ class Generator
         if ($namespace === null) {
             $namespace = '\\'.trim($class->getNamespaceName(), '\\');
         }
+        $namespace = rtrim($namespace, '\\');
+        $className = '\\'.trim($namespace.'\\'.$class->getShortName(), '\\');
 
         $config = [
-            'method'    => $objectManager->method->value,
-            'name'      => $objectManager->name ?? $class->getShortName(),
-            'namespace' => $namespace,
-            'gc'        => $objectManager->gc,
+            'method'       => $objectManager->method->value,
+            'name'         => $objectManager->name ?? $class->getShortName(),
+            'namespace'    => $namespace,
+            'model'        => $class->getShortName(),
+            'model_lookup' => $className,
+            'class'        => $className,
+            'gc'           => $objectManager->gc,
         ];
 
         $factory = [];

@@ -121,6 +121,79 @@ class GeneratorTest extends TestCase
         );
     }
 
+    public function testGeneratesBothClassesWhenShortNamesCollide(): void
+    {
+        require_once __DIR__.'/Fixtures/AttributeModels/NameCollision/Member.php';
+        require_once __DIR__.'/Fixtures/AttributeModels/NameCollision/ADR/Member.php';
+
+        $generator = new Generator();
+        $generator->addPath(__DIR__.'/Fixtures/AttributeModels/NameCollision');
+        self::assertTrue($generator->generate());
+
+        $generated = $this->readGeneratedManager();
+        self::assertStringContainsString('public function getMember(', $generated);
+        self::assertStringContainsString('public function getADRMember(', $generated);
+        self::assertStringContainsString(
+            "return \$this->getObject('\\GCWorld\\ObjectManager\\Tests\\Fixtures\\AttributeModels\\NameCollision\\Member'",
+            $generated
+        );
+        self::assertStringContainsString(
+            "return \$this->getObject('\\GCWorld\\ObjectManager\\Tests\\Fixtures\\AttributeModels\\NameCollision\\ADR\\Member'",
+            $generated
+        );
+    }
+
+    public function testRejectsDuplicateGeneratedGetterNamesBeforeWritingFile(): void
+    {
+        require_once __DIR__.'/Fixtures/AttributeModels/InvalidNameCollision/Member.php';
+        require_once __DIR__.'/Fixtures/AttributeModels/InvalidNameCollision/ADR/Member.php';
+
+        $generatedDir = dirname($this->generatedPath);
+        if (!is_dir($generatedDir)) {
+            mkdir($generatedDir, 0755, true);
+        }
+        file_put_contents($this->generatedPath, 'existing generated manager');
+
+        $generator = new Generator();
+        $generator->addPath(__DIR__.'/Fixtures/AttributeModels/InvalidNameCollision');
+
+        try {
+            $generator->generate();
+            self::fail('Expected a generated method collision.');
+        } catch (\Exception $exception) {
+            self::assertStringContainsString('Generated method collision for getMember', $exception->getMessage());
+            self::assertStringContainsString('Set a unique ObjectManagerAttribute name', $exception->getMessage());
+        }
+
+        self::assertSame('existing generated manager', file_get_contents($this->generatedPath));
+    }
+
+    public function testLegacyConfigOverridesAttributedConfigByFullyQualifiedClassName(): void
+    {
+        require_once __DIR__.'/Fixtures/AttributeModels/NameCollision/Member.php';
+        $fixtureDir = $this->makeFixtureDir([
+            __DIR__.'/Fixtures/AttributeModels/NameCollision/Member.php',
+        ]);
+
+        $generator = new Generator();
+        $config = new \ReflectionProperty(Generator::class, 'config');
+        $config->setValue($generator, [
+            'Member' => [
+                'namespace' => '\\GCWorld\\ObjectManager\\Tests\\Fixtures\\AttributeModels\\NameCollision',
+                'method'    => 'getModel',
+                'name'      => 'ConfiguredMember',
+                'gc'        => 0,
+            ],
+        ]);
+        $generator->addPath($fixtureDir);
+        self::assertTrue($generator->generate());
+
+        $generated = $this->readGeneratedManager();
+        self::assertStringContainsString('public function getConfiguredMember(', $generated);
+        self::assertStringNotContainsString('public function getMember(', $generated);
+        self::assertStringContainsString("return \$this->getModel('Member'", $generated);
+    }
+
     public function testRejectsNonPublicStaticObjectFactoryMethods(): void
     {
         require_once __DIR__.'/Fixtures/AttributeModels/InvalidFactoryModel.php';
