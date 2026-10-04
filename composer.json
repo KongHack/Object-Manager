@@ -9,8 +9,8 @@
   ],
   "require": {
     "php": ">=8.4",
-    "composer/composer": ">=2.7",
-    "gcworld/utilities": ">=2.0",
+    "composer/composer": "^2.7",
+    "gcworld/utilities": "^2.0",
     "symfony/yaml": "^6.0"
   },
   "require-dev": {
@@ -30,6 +30,9 @@
       "GCWorld\\ObjectManager\\ComposerInstaller::setupConfig"
     ],
     "test": "phpunit",
+    "check": [
+      "@test"
+    ],
     "migrate-docblocks": "php bin/migrate-docblocks.php"
   },
   "license":"MIT"
