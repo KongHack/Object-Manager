@@ -1,6 +1,7 @@
 <?php
 namespace GCWorld\ObjectManager;
 
+use Exception;
 use GCWorld\ObjectManager\Attributes\ObjectFactoryAttribute;
 use GCWorld\ObjectManager\Attributes\ObjectManagerAttribute;
 use GCWorld\ObjectManager\Enums\ObjectManagerMethod;
@@ -43,7 +44,7 @@ class Generator
         $this->config = $config;
 
         foreach($this->config as $model => $definition) {
-            if(strpos($model,'ExampleModelName')===0) {
+            if(str_starts_with($model, 'ExampleModelName')) {
                 unset($this->config[$model]);
                 continue;
             }
@@ -53,7 +54,7 @@ class Generator
     /**
      * @param bool $debug
      */
-    public function setDebug(bool $debug)
+    public function setDebug(bool $debug): void
     {
         $this->debug = $debug;
     }
@@ -62,7 +63,7 @@ class Generator
      * @param string $path
      * @return $this
      */
-    public function addPath(string $path)
+    public function addPath(string $path): static
     {
         $this->paths[] = $path;
 
@@ -99,7 +100,7 @@ class Generator
 
         // Make sure we have trailing slashes!
         foreach($this->config as $model => $definition) {
-            if(array_key_exists('namespace',$definition) && substr($definition['namespace'],-1) != '\\') {
+            if(array_key_exists('namespace',$definition) && !str_ends_with($definition['namespace'], '\\')) {
                 $this->config[$model]['namespace'] .= '\\';
             }
         }
@@ -348,6 +349,10 @@ class Generator
         return $return;
     }
 
+    /**
+     * @param ReflectionClass $class
+     * @return array|bool
+     */
     private function extractAttributeConfig(ReflectionClass $class): array|bool
     {
         $attributes = $class->getAttributes(ObjectManagerAttribute::class, ReflectionAttribute::IS_INSTANCEOF);
@@ -382,6 +387,11 @@ class Generator
         return $config;
     }
 
+    /**
+     * @param ReflectionClass $class
+     * @return array
+     * @throws Exception
+     */
     private function extractFactoryMethods(ReflectionClass $class): array
     {
         $factory = [];
@@ -396,7 +406,7 @@ class Generator
             }
 
             if (!$method->isPublic() || !$method->isStatic()) {
-                throw new \Exception(
+                throw new Exception(
                     'ObjectFactoryAttribute must be declared on a public static method: '.
                     $class->getName().'::'.$method->getName()
                 );
@@ -408,6 +418,10 @@ class Generator
         return $factory;
     }
 
+    /**
+     * @param ReflectionMethod $method
+     * @return array
+     */
     private function reflectFactoryArgs(ReflectionMethod $method): array
     {
         $args = [];
@@ -418,6 +432,10 @@ class Generator
         return $args;
     }
 
+    /**
+     * @param ReflectionParameter $parameter
+     * @return string
+     */
     private function formatParameterDefinition(ReflectionParameter $parameter): string
     {
         $type = $this->formatType($parameter->getType());
@@ -433,6 +451,10 @@ class Generator
         return $type.' '.$name;
     }
 
+    /**
+     * @param ReflectionType|null $type
+     * @return string
+     */
     private function formatType(?ReflectionType $type): string
     {
         if ($type === null) {
@@ -464,6 +486,10 @@ class Generator
         return 'mixed';
     }
 
+    /**
+     * @param ReflectionNamedType $type
+     * @return string
+     */
     private function formatNamedType(ReflectionNamedType $type): string
     {
         $name = $type->getName();
@@ -478,6 +504,10 @@ class Generator
         return $name;
     }
 
+    /**
+     * @param string $file
+     * @return array
+     */
     private function discoverClassesInFile(string $file): array
     {
         $contents = file_get_contents($file);
@@ -528,6 +558,11 @@ class Generator
         return $classes;
     }
 
+    /**
+     * @param array $tokens
+     * @param int $start
+     * @return string
+     */
     private function readNamespaceTokens(array $tokens, int $start): string
     {
         $namespace  = '';
@@ -549,6 +584,11 @@ class Generator
         return trim($namespace, '\\');
     }
 
+    /**
+     * @param array $tokens
+     * @param int $start
+     * @return string|null
+     */
     private function readNextIdentifier(array $tokens, int $start): ?string
     {
         $tokenCount = count($tokens);
